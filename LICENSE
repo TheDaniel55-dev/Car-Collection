@@ -1,0 +1,15 @@
+Car collection — proprietary licence
+
+Copyright (c) 2026 the owner of this repository. All rights reserved.
+
+The application source code, design and translations in this repository may not be copied,
+modified, redistributed or used to build derivative apps without the owner's written permission.
+Viewing and running the published app for personal use is allowed.
+
+Exceptions (each keeps its own licence, see THIRD-PARTY.md):
+  - Catalogue data in /data: derived from the Hot Wheels Wiki (Fandom), licensed CC BY-SA
+    (attribution required, share-alike). This dataset is NOT covered by the proprietary licence above.
+  - Third-party libraries and fonts.
+
+"Hot Wheels" and "Mattel" are trademarks of Mattel, Inc. This project is unofficial and is not
+affiliated with, endorsed or sponsored by Mattel.

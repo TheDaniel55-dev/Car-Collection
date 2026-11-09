@@ -1,0 +1,21 @@
+{
+ "version": 1,
+ "built": "2026-11-09T17:58:03.933Z",
+ "total": 6,
+ "shards": [
+  {
+   "y": 0,
+   "file": "y0.json",
+   "hash": "490f18524f7853b4",
+   "size": 500,
+   "n": 6
+  }
+ ],
+ "source": {
+  "name": "Starter examples",
+  "url": "",
+  "license": "",
+  "licenseUrl": ""
+ },
+ "seed": true
+}

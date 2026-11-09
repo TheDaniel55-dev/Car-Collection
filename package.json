@@ -1,0 +1,33 @@
+{
+  "name": "car-collection",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Offline-first PWA for tracking a Hot Wheels collection",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && node scripts/postbuild.mjs",
+    "preview": "vite preview",
+    "data": "node data-pipeline/build-data.mjs",
+    "test": "node scripts/check-i18n.mjs && node data-pipeline/test/parse.test.mjs && node scripts/test-logic.mjs",
+    "smoke": "node scripts/smoke-test.mjs",
+    "icons": "node scripts/make-icons.mjs",
+    "seed": "node data-pipeline/seed.mjs"
+  },
+  "devDependencies": {
+    "fake-indexeddb": "^6.2.8",
+    "javascript-obfuscator": "^4.1.1",
+    "jsdom": "^31.0.0",
+    "node-html-parser": "^9.0.7",
+    "sharp": "^0.35.5",
+    "vite": "^5.4.0"
+  },
+  "dependencies": {
+    "@fontsource/barlow-condensed": "^5.1.0",
+    "@fontsource/ibm-plex-mono": "^5.1.0",
+    "@fontsource/ibm-plex-sans": "^5.1.0",
+    "@tesseract.js-data/eng": "^1.0.0",
+    "tesseract.js": "^5.1.1",
+    "tesseract.js-core": "^5.1.1"
+  }
+}

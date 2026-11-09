@@ -1,0 +1,46 @@
+name: Refresh database
+on:
+  schedule:
+    - cron: "17 4 3 * *"   # monthly, day 3, 04:17 UTC
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: data-refresh
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Build dataset (fails instead of publishing broken data)
+        run: npm run data
+      - id: commit
+        run: |
+          git config user.name "car-collection-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add data
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"; echo "No data changes."
+          else
+            git commit -m "Update database"
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+  deploy:
+    needs: refresh
+    if: needs.refresh.outputs.changed == 'true'
+    uses: ./.github/workflows/deploy.yml
+    permissions:
+      contents: read
+      pages: write
+      id-token: write

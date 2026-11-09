@@ -1,0 +1,33 @@
+# VARIANTA B (avansat): codul sursă rămâne într-un repo PRIVAT, iar doar site-ul compilat+obfuscat
+# se publică într-un al doilea repo PUBLIC (cu GitHub Pages). Vezi README, secțiunea „Varianta B".
+# Necesită: secretul SITE_TOKEN (fine-grained token cu Contents: write pe repo-ul public) și variabila SITE_REPO (ex. numele/car-collection-site).
+name: Publish to public site repo
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  publish:
+    if: ${{ vars.SITE_REPO != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: Push dist to the public repo
+        env:
+          TOKEN: ${{ secrets.SITE_TOKEN }}
+          REPO: ${{ vars.SITE_REPO }}
+        run: |
+          git clone --depth 1 "https://x-access-token:${TOKEN}@github.com/${REPO}.git" site
+          find site -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -a dist/. site/
+          cd site
+          git config user.name "car-collection-bot"; git config user.email "bot@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && echo "nothing to publish" || (git commit -m "Publish build" && git push)

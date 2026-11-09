@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' blob:; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#faf6f0">
+<meta name="color-scheme" content="light dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Car collection">
+<meta name="description" content="Offline-first collection tracker for die-cast cars. No account, no tracking.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<title>Car collection</title>
+<script>
+  // Apply the saved theme before first paint (no flash).
+  try {
+    var s = (localStorage.getItem('cc.theme') || 'track|sys').split('|');
+    var dark = s[0] === 'neon' || s[1] === 'dark' || (s[1] === 'sys' && matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.className = 't-' + s[0] + (dark ? ' d' : '');
+  } catch (e) { document.documentElement.className = 't-track'; }
+</script>
+</head>
+<body>
+<div id="app"><main id="view" tabindex="-1"></main></div>
+<button type="button" class="fab" id="fab" data-act="open-add">+ Add</button>
+<nav id="nav" aria-label="Main"></nav>
+<div id="sheets"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<div id="boot" hidden></div>
+<div id="lock" hidden></div>
+<div id="install" hidden></div>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
