@@ -1,21 +1,392 @@
 {
- "version": 1,
- "built": "2026-11-09T17:58:03.933Z",
- "total": 6,
+ "version": 2,
+ "built": "2026-11-09T18:43:32.130Z",
+ "total": 11980,
  "shards": [
   {
-   "y": 0,
-   "file": "y0.json",
-   "hash": "490f18524f7853b4",
-   "size": 500,
-   "n": 6
+   "y": 1968,
+   "file": "y1968.json",
+   "hash": "6796d562dc9360f3",
+   "size": 1361,
+   "n": 16
+  },
+  {
+   "y": 1969,
+   "file": "y1969.json",
+   "hash": "b399b7e3646f9845",
+   "size": 2158,
+   "n": 24
+  },
+  {
+   "y": 1974,
+   "file": "y1974.json",
+   "hash": "3c435bd5f963e282",
+   "size": 2171,
+   "n": 25
+  },
+  {
+   "y": 1975,
+   "file": "y1975.json",
+   "hash": "c3664d443c27d183",
+   "size": 2756,
+   "n": 31
+  },
+  {
+   "y": 1976,
+   "file": "y1976.json",
+   "hash": "8d56207057150dac",
+   "size": 3434,
+   "n": 40
+  },
+  {
+   "y": 1977,
+   "file": "y1977.json",
+   "hash": "d0c2d0d07eccc478",
+   "size": 7236,
+   "n": 81
+  },
+  {
+   "y": 1978,
+   "file": "y1978.json",
+   "hash": "f7d8b53f6fd6dfcc",
+   "size": 6960,
+   "n": 54
+  },
+  {
+   "y": 1979,
+   "file": "y1979.json",
+   "hash": "827f891aaf87a647",
+   "size": 5406,
+   "n": 39
+  },
+  {
+   "y": 1980,
+   "file": "y1980.json",
+   "hash": "f900e358142cd5d5",
+   "size": 6295,
+   "n": 47
+  },
+  {
+   "y": 1981,
+   "file": "y1981.json",
+   "hash": "4849f305b93b6b0a",
+   "size": 3096,
+   "n": 25
+  },
+  {
+   "y": 1982,
+   "file": "y1982.json",
+   "hash": "50ff6514a7b066ca",
+   "size": 10620,
+   "n": 87
+  },
+  {
+   "y": 1983,
+   "file": "y1983.json",
+   "hash": "4d8049d0287c59bc",
+   "size": 8010,
+   "n": 63
+  },
+  {
+   "y": 1984,
+   "file": "y1984.json",
+   "hash": "17d66a9aa6a52914",
+   "size": 4033,
+   "n": 32
+  },
+  {
+   "y": 1985,
+   "file": "y1985.json",
+   "hash": "d187d4398ddd5361",
+   "size": 5111,
+   "n": 38
+  },
+  {
+   "y": 1986,
+   "file": "y1986.json",
+   "hash": "c40d0bd96382363f",
+   "size": 3029,
+   "n": 25
+  },
+  {
+   "y": 1987,
+   "file": "y1987.json",
+   "hash": "837c4a7aab470c8e",
+   "size": 2566,
+   "n": 22
+  },
+  {
+   "y": 1988,
+   "file": "y1988.json",
+   "hash": "48859725c37087d7",
+   "size": 3233,
+   "n": 27
+  },
+  {
+   "y": 1989,
+   "file": "y1989.json",
+   "hash": "ffa951e0cd3cdccd",
+   "size": 6399,
+   "n": 76
+  },
+  {
+   "y": 1990,
+   "file": "y1990.json",
+   "hash": "8bb0eef4bc501782",
+   "size": 10250,
+   "n": 78
+  },
+  {
+   "y": 1991,
+   "file": "y1991.json",
+   "hash": "5492d7987c3ae746",
+   "size": 7660,
+   "n": 60
+  },
+  {
+   "y": 1992,
+   "file": "y1992.json",
+   "hash": "6793ad2bed78825e",
+   "size": 2823,
+   "n": 24
+  },
+  {
+   "y": 1993,
+   "file": "y1993.json",
+   "hash": "a30943f53b12e96f",
+   "size": 8175,
+   "n": 71
+  },
+  {
+   "y": 1994,
+   "file": "y1994.json",
+   "hash": "97147140addb0d37",
+   "size": 1766,
+   "n": 13
+  },
+  {
+   "y": 1995,
+   "file": "y1995.json",
+   "hash": "50869bc70e4c8b6a",
+   "size": 9067,
+   "n": 97
+  },
+  {
+   "y": 1996,
+   "file": "y1996.json",
+   "hash": "393f3dc627434d86",
+   "size": 12611,
+   "n": 139
+  },
+  {
+   "y": 1999,
+   "file": "y1999.json",
+   "hash": "5152db5098d9b6ee",
+   "size": 19779,
+   "n": 212
+  },
+  {
+   "y": 2000,
+   "file": "y2000.json",
+   "hash": "2093913889f970f1",
+   "size": 23307,
+   "n": 249
+  },
+  {
+   "y": 2001,
+   "file": "y2001.json",
+   "hash": "4cb7540127ea548a",
+   "size": 23633,
+   "n": 256
+  },
+  {
+   "y": 2002,
+   "file": "y2002.json",
+   "hash": "701c715332d5c534",
+   "size": 22713,
+   "n": 243
+  },
+  {
+   "y": 2003,
+   "file": "y2003.json",
+   "hash": "a444eaaa48034354",
+   "size": 20079,
+   "n": 222
+  },
+  {
+   "y": 2004,
+   "file": "y2004.json",
+   "hash": "9b36698693ce2826",
+   "size": 26553,
+   "n": 268
+  },
+  {
+   "y": 2005,
+   "file": "y2005.json",
+   "hash": "2899326aefd15b55",
+   "size": 29518,
+   "n": 288
+  },
+  {
+   "y": 2006,
+   "file": "y2006.json",
+   "hash": "2ad4125ab5884e1d",
+   "size": 35274,
+   "n": 362
+  },
+  {
+   "y": 2007,
+   "file": "y2007.json",
+   "hash": "c9a7644268d0afb3",
+   "size": 30120,
+   "n": 315
+  },
+  {
+   "y": 2008,
+   "file": "y2008.json",
+   "hash": "c4881a4f6923f71a",
+   "size": 34569,
+   "n": 358
+  },
+  {
+   "y": 2009,
+   "file": "y2009.json",
+   "hash": "84742987b6b917bc",
+   "size": 33649,
+   "n": 342
+  },
+  {
+   "y": 2010,
+   "file": "y2010.json",
+   "hash": "bca396e1da8208f1",
+   "size": 41827,
+   "n": 423
+  },
+  {
+   "y": 2011,
+   "file": "y2011.json",
+   "hash": "ef09e22002829a99",
+   "size": 43019,
+   "n": 429
+  },
+  {
+   "y": 2012,
+   "file": "y2012.json",
+   "hash": "fd176c416d2b1836",
+   "size": 39760,
+   "n": 392
+  },
+  {
+   "y": 2013,
+   "file": "y2013.json",
+   "hash": "806b3795fd8e0917",
+   "size": 44833,
+   "n": 439
+  },
+  {
+   "y": 2014,
+   "file": "y2014.json",
+   "hash": "240c0e6ced3d6370",
+   "size": 43806,
+   "n": 437
+  },
+  {
+   "y": 2015,
+   "file": "y2015.json",
+   "hash": "dd5935053a01af4c",
+   "size": 43475,
+   "n": 437
+  },
+  {
+   "y": 2016,
+   "file": "y2016.json",
+   "hash": "b5d64226fbeb809a",
+   "size": 44135,
+   "n": 441
+  },
+  {
+   "y": 2017,
+   "file": "y2017.json",
+   "hash": "e586e911da0dae4a",
+   "size": 43591,
+   "n": 450
+  },
+  {
+   "y": 2018,
+   "file": "y2018.json",
+   "hash": "0791962caa7f59e4",
+   "size": 45649,
+   "n": 469
+  },
+  {
+   "y": 2019,
+   "file": "y2019.json",
+   "hash": "66e4dafe766bc647",
+   "size": 45560,
+   "n": 449
+  },
+  {
+   "y": 2020,
+   "file": "y2020.json",
+   "hash": "8e797a08295178fc",
+   "size": 46125,
+   "n": 455
+  },
+  {
+   "y": 2021,
+   "file": "y2021.json",
+   "hash": "90887ad88126dd94",
+   "size": 46413,
+   "n": 455
+  },
+  {
+   "y": 2022,
+   "file": "y2022.json",
+   "hash": "fccc362d7c9206ba",
+   "size": 46280,
+   "n": 447
+  },
+  {
+   "y": 2023,
+   "file": "y2023.json",
+   "hash": "b792a2bbb5d56d58",
+   "size": 45927,
+   "n": 445
+  },
+  {
+   "y": 2024,
+   "file": "y2024.json",
+   "hash": "2cc99c780915e439",
+   "size": 45490,
+   "n": 441
+  },
+  {
+   "y": 2025,
+   "file": "y2025.json",
+   "hash": "c6aba2d4ec2e8b2a",
+   "size": 45080,
+   "n": 440
+  },
+  {
+   "y": 2026,
+   "file": "y2026.json",
+   "hash": "12c212d2d276a721",
+   "size": 44388,
+   "n": 440
+  },
+  {
+   "y": 2027,
+   "file": "y2027.json",
+   "hash": "5125ba77465f4276",
+   "size": 13940,
+   "n": 142
   }
  ],
  "source": {
-  "name": "Starter examples",
-  "url": "",
-  "license": "",
-  "licenseUrl": ""
+  "name": "Hot Wheels Wiki (Fandom)",
+  "url": "https://hotwheels.fandom.com/",
+  "license": "CC BY-SA 3.0 (verify on the wiki)",
+  "licenseUrl": "https://www.fandom.com/licensing"
  },
- "seed": true
+ "seed": false
 }
