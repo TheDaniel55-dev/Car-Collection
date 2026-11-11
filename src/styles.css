@@ -143,3 +143,10 @@ body.shop .vd p{font-size:1.25rem}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.ring .fg{stroke-dashoffset:var(--to)}}
 @media (max-width:380px){.grid2{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}}
 @media (forced-colors:active){.chip,.pl,.btn{border:1px solid CanvasText}}
+
+.cmpside{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.cmphead,.cmprow{display:grid;grid-template-columns:minmax(80px,.8fr) 1fr 1fr;gap:8px;align-items:start;padding:8px 6px;border-bottom:1px solid color-mix(in srgb,var(--mu) 25%,transparent)}
+.cmphead b{text-align:left;font-size:1.1rem}.cmprow .cl{color:var(--mu);font-size:.78rem;text-transform:uppercase;letter-spacing:.06em}
+.cmprow .cv{word-break:break-word}.cmprow.diff{background:color-mix(in srgb,var(--warn) 14%,transparent);border-radius:8px}.cmprow.diff .cv{font-weight:600}
+.cmpsum{margin:10px 0}.cmpsum h2{font-size:1.6rem}
+.guide{padding-left:20px;display:flex;flex-direction:column;gap:8px}

@@ -16,6 +16,7 @@ import { openSheet, setSheet, closeSheet, closeAllSheets, toast, ring, $, $$, bu
 import { acts, ins, chs, hooks } from './registry.js';
 import { dot, thumb, pill, palettePicker, field, cname, typeLabel } from './common.js';
 import { openAdd, openCar } from './sheets.js';
+import { cmpHTML } from './compare.js';
 
 const hdr = (title, sub = '') => `<header class="hdr"><h1>${esc(title)}</h1>${sub ? `<div class="mu">${esc(sub)}</div>` : ''}</header>`;
 
@@ -102,9 +103,10 @@ acts['open-add'] = () => openAdd(S.tab === 'chk' && S.chk.q ? { q: S.chk.q, cf: 
 
 /* =============================== CHECK =============================== */
 export function checkHTML() {
+  if (S.chkView === 'cmp') return cmpHTML();
   const c = S.chk;
   return `${S.shop ? '' : hdr(t('chk.title'), t('chk.sub'))}
-  <div class="row"><button type="button" class="btn s ${S.shop ? 'exit' : ''}" data-act="shop-toggle">${esc(S.shop ? t('shop.exit') : '🛒 ' + t('shop.title'))}</button></div>
+  <div class="row wrap"><button type="button" class="btn s ${S.shop ? 'exit' : ''}" data-act="shop-toggle">${esc(S.shop ? t('shop.exit') : '🛒 ' + t('shop.title'))}</button>${S.shop ? '' : `<button type="button" class="btn s" data-act="cmp-open">⚖ ${esc(t('cmp.open'))}</button>`}</div>
   <input id="chk-q" class="search ${S.shop ? 'huge' : ''}" data-in="chk-q" placeholder="${esc(t('chk.ph'))}" value="${esc(c.q)}" autocomplete="off" autocapitalize="characters" enterkeyhint="search" aria-label="${esc(t('chk.ph'))}">
   <div class="row wrap ${S.shop ? 'hide-shop' : ''}">
     <label class="btn s file">🚗 ${esc(t('add.carPhoto'))}<input type="file" accept="image/*" class="vh" data-ch="chk-photo"></label>
@@ -139,7 +141,7 @@ function shopScore(pick, vars) {
   return `<div class="scorebox"><div class="row"><b class="g">${esc(t('chk.score'))}</b><span class="chip pill" style="background:${TIER_COLORS[top.tier]}">${val} · ${esc(t('tier.' + top.tier))}</span></div>
   ${lo === hi ? '' : `<p class="small">${esc(t('chk.scoreRange', { a: lo, b: hi, n: scores.length }))}</p>`}
   <p class="small">${esc(t('chk.conf.' + conf))}</p>
-  ${hasTH ? `<p class="warn">⚠ ${esc(t('chk.thWarn'))}</p>` : ''}
+  ${hasTH ? `<p class="warn">⚠ ${esc(t('chk.thWarn'))}</p><button type="button" class="btn s" data-act="th-guide">${esc(t('th.btn'))}</button>` : ''}
   ${colourData ? '' : `<p class="small">${esc(t('chk.dataWarn'))}</p>`}
   <button type="button" class="btn s" data-act="rarity-how">${esc(t('rarity.how'))}</button></div>`;
 }
@@ -167,6 +169,10 @@ function checkResult() {
   ${own1.length ? `<p class="small">${esc(t('chk.youHave'))}: ${own1.map((o) => `${o.snap.col || cname(o.snap.cf)}${o.qty > 1 ? ' ×' + o.qty : ''}`).join(', ')}</p>` : ''}
   <button type="button" class="btn light" data-act="chk-add">${esc(level === 'red' ? t('chk.addAnyway') : t('add.title'))}</button></div>`;
 }
+
+acts['th-guide'] = () => {
+  openSheet(`<h2>${esc(t('th.title'))}</h2><ul class="guide">${[1, 2, 3, 4, 5, 6].map((i) => `<li>${esc(t('th.g.' + i))}</li>`).join('')}</ul><p class="mu">${esc(t('th.src'))}</p><button type="button" class="btn s" data-act="sheet-close">${esc(t('close'))}</button>`);
+};
 
 const redoCheck = () => { const r = $('#chk-res'); if (r) r.innerHTML = checkResult(); };
 ins['chk-q'] = (el) => { S.chk.q = el.value; S.chk.pick = null; S.chk.vid = null; S.chk.ser = ''; redoCheck(); };

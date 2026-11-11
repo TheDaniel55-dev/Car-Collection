@@ -39,6 +39,20 @@ const q = $('#add-q'); if (!q) fail('add sheet has no search input');
 q.value = 'GRX20'; q.dispatchEvent(new w.Event('input', { bubbles: true })); await wait(200);
 if (!/Supra/i.test($('.sheet-layer.on')?.textContent || '')) fail('seed car GRX20 not found in add search');
 console.log('add search finds seed car: ok');
+// shop check shows a rarity score without adding the car
+click($('#nav [data-v="chk"]')); await wait(150);
+const cq = $('#chk-q'); if (!cq) fail('check tab has no search input');
+cq.value = 'GRX20'; cq.dispatchEvent(new w.Event('input', { bubbles: true })); await wait(200);
+if (!/Rarity score|Scor de raritate/i.test($('#chk-res')?.textContent || '')) fail('check result has no rarity score');
+console.log('shop check shows rarity score: ok');
+// compare two cars
+click($('[data-act="cmp-open"]')); await wait(150);
+for (const k of ['a', 'b']) { const i = $('#cmp-q-' + k); if (!i) fail('compare has no input ' + k); i.value = 'supra'; i.dispatchEvent(new w.Event('input', { bubbles: true })); await wait(150); }
+if ($('#cmp-table .cmprow') === null) fail('compare table has no rows');
+click($('[data-act="cmp-col-a"][data-v="red"]')); click($('[data-act="cmp-col-b"][data-v="blue"]')); await wait(100);
+if (!/different colour|culoare diferită/i.test($('#cmp-table')?.textContent || '')) fail('compare does not report different colours');
+console.log('compare two cars: ok');
+click($('[data-act="cmp-close"]')); await wait(100);
 if (errors.length) fail('runtime errors');
 fs.rmSync(dir, { recursive: true, force: true });
 console.log('SMOKE OK (jsdom; not a real browser)'); process.exit(0);
