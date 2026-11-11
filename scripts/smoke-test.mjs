@@ -48,6 +48,12 @@ const cq = $('#chk-q'); if (!cq) fail('check tab has no search input');
 cq.value = 'GRX20'; cq.dispatchEvent(new w.Event('input', { bubbles: true })); await wait(200);
 if (!/Rarity score|Scor de raritate/i.test($('#chk-res')?.textContent || '')) fail('check result has no rarity score');
 console.log('shop check shows rarity score: ok');
+// wishlist from the check screen
+click($('[data-act="wish-add"]')); await wait(200);
+click($('#nav [data-v="col"]')); await wait(150);
+if (!/Wishlist|Dorințe/i.test($('#view')?.textContent || '')) fail('wishlist card missing on the home page');
+console.log('wishlist: ok');
+click($('#nav [data-v="chk"]')); await wait(150);
 // compare two cars
 click($('[data-act="cmp-open"]')); await wait(150);
 for (const k of ['a', 'b']) { const i = $('#cmp-q-' + k); if (!i) fail('compare has no input ' + k); i.value = 'supra'; i.dispatchEvent(new w.Event('input', { bubbles: true })); await wait(150); }

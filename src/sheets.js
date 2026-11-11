@@ -207,6 +207,9 @@ acts['f-save'] = async () => {
     await saveOwned(rec); closeSheet(); hooks.refresh(); toast(t('saved')); return;
   }
   const { merged } = await addOwned({ vid: A.vid, snap, qty: x.qty, prod: x.prod, loc: x.loc, st: x.st, note: x.note, photo: A.photo, separate: !!A.sep });
+  const wl = S.profile.wish || [];
+  const wl2 = wl.filter((x) => !(x.key === snap.key && (!x.cf || x.cf === snap.cf)));
+  if (wl2.length !== wl.length) { S.profile.wish = wl2; await saveProfile(); }
   closeAllSheets(); hooks.refresh();
   const after = completedSet(); const done = [...after].some((id) => !before.has(id));
   if (done) { confetti(); buzz([40, 30, 40]); toast('🎉 ' + t('series.completed')); } else toast(merged ? t('add.merged') : t('add.added', { n: snap.name }));

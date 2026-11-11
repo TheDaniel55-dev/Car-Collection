@@ -358,6 +358,12 @@
  "chk.recent": "Verificate recent",
  "chk.recentClear": "Șterge",
  "stats.dupList": "Mașini pe care le ai de mai multe ori",
+ "wish.title": "Dorințe",
+ "wish.add": "Adaugă la dorințe",
+ "wish.added": "Adăugat la dorințe",
+ "wish.in": "În dorințele tale",
+ "wish.remove": "Scoate din dorințe",
+ "col.refresh": "Arată alte sugestii",
  "update.available": "Actualizare disponibilă",
  "update.reload": "Reîncarcă"
 }

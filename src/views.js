@@ -22,10 +22,11 @@ const hdr = (title, sub = '') => `<header class="hdr"><h1>${esc(title)}</h1>${su
 
 /* =============================== COLLECTION =============================== */
 let sugMemo = { sig: '', list: [] };
+let sugNonce = 0; // bumped by the refresh button; the memo is empty on every app start, so each visit shows new picks
 function suggestions() {
   const p = S.profile, pf = p.prefs;
   if (!p.onboarded || !cat.list.length) return [];
-  const sig = `${pf.cats}|${pf.brands}|${pf.eras}|${own.list.length}|${cat.list.length}`;
+  const sig = `${pf.cats}|${pf.brands}|${pf.eras}|${own.list.length}|${cat.list.length}|${sugNonce}`;
   if (sugMemo.sig === sig) return sugMemo.list;
   const brands = new Set(pf.brands); const kws = [];
   for (const c of pf.cats) { CATEGORIES[c]?.brands.forEach((b) => brands.add(b)); kws.push(...(CATEGORIES[c]?.kw || [])); }
@@ -42,10 +43,29 @@ function suggestions() {
       list.push({ c, s: s + (c.y1 || 0) / 10000 });
     }
   }
-  const out = list.sort((a, b) => b.s - a.s).slice(0, 3).map((x) => x.c);
+  // Random picks from the best-matching pool, so the suggestions change at every visit / refresh.
+  const pool = list.sort((a, b) => b.s - a.s).slice(0, 30).map((x) => x.c);
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  const out = pool.slice(0, 3);
   sugMemo = { sig, list: out };
   return out;
 }
+
+/* ---- wishlist ---- */
+const isWished = (key, cf) => (S.profile.wish || []).some((w) => w.key === key && (w.cf || '') === (cf || ''));
+function wishHTML() {
+  const w = S.profile.wish || [];
+  if (!w.length) return '';
+  return `<div class="card"><b>${esc(t('wish.title'))}</b>${w.map((x, i) => `<div class="row linkrow pad"><button type="button" class="linkbtn g" data-act="add-casting" data-key="${esc(x.key)}"><b>${x.cf ? dot(x.cf) + ' ' : ''}${esc(x.name)}</b></button><button type="button" class="pl" data-act="wish-del" data-i="${i}" aria-label="${esc(t('wish.remove'))}">✕</button></div>`).join('')}</div>`;
+}
+acts['sug-refresh'] = () => { sugNonce++; hooks.refresh(); };
+acts['wish-add'] = async (el) => {
+  const { key, name, cf } = el.dataset;
+  if (isWished(key, cf)) { toast(t('wish.in')); return; }
+  S.profile.wish = [{ key, name, cf: cf || '', ts: Date.now() }, ...(S.profile.wish || [])].slice(0, 100);
+  await saveProfile(); toast(t('wish.added')); hooks.refresh();
+};
+acts['wish-del'] = async (el) => { const w = (S.profile.wish || []).slice(); w.splice(Number(el.dataset.i), 1); S.profile.wish = w; await saveProfile(); hooks.refresh(); };
 
 const SORTS = ['new', 'name', 'base', 'year', 'colour', 'rarity'];
 function filtered() {
@@ -94,7 +114,8 @@ export function collectionHTML() {
   const sug = suggestions();
   const greet = S.profile.name ? t('col.hi', { n: S.profile.name }) : t('app.name');
   return `${backupBanner(total)}<header class="hdr"><div><h1>${esc(t('app.name'))}</h1><div class="mu">${esc(greet)} · ${esc(t('col.count', { n: total, m: own.byKey.size }))}</div></div></header>
-  ${sug.length ? `<div class="card"><b>${esc(t('col.suggest'))}</b>${sug.map((c) => `<button type="button" class="row linkrow pad" data-act="add-casting" data-key="${esc(c.key)}"><span class="g"><b>${esc(c.name)}</b><span class="mu">${esc(c.brand)}</span></span><span class="mu">+</span></button>`).join('')}</div>` : ''}
+  ${sug.length ? `<div class="card"><div class="row"><b class="g">${esc(t('col.suggest'))}</b><button type="button" class="pl" data-act="sug-refresh" aria-label="${esc(t('col.refresh'))}" title="${esc(t('col.refresh'))}">🔄</button></div>${sug.map((c) => `<div class="row linkrow pad"><button type="button" class="linkbtn g" data-act="add-casting" data-key="${esc(c.key)}"><b>${esc(c.name)}</b><span class="mu">${esc(c.brand)} · +</span></button><button type="button" class="pl ${isWished(c.key, '') ? 'on' : ''}" data-act="wish-add" data-key="${esc(c.key)}" data-name="${esc(c.name)}" data-cf="" aria-label="${esc(t('wish.add'))}" title="${esc(t('wish.add'))}">${isWished(c.key, '') ? '♥' : '♡'}</button></div>`).join('')}</div>` : ''}
+  ${wishHTML()}
   <input class="search" data-in="col-q" placeholder="${esc(t('col.search'))}" value="${esc(S.f.q)}" aria-label="${esc(t('col.search'))}" autocomplete="off">
   <div class="chips" id="col-chips">${chipsHTML(brands)}</div>
   <div class="row"><select class="g" data-ch="col-sort" aria-label="${esc(t('sort'))}">${SORTS.map((k, i) => `<option value="${k}" ${S.f.sort === k ? 'selected' : ''}>${esc(tl('sort.opts')[i])}</option>`).join('')}</select>
@@ -178,7 +199,8 @@ function checkResult() {
   ${vars.length ? `<p class="small">${esc(t('chk.variants', { n: vars.length, m: own1.length ? Math.min(vars.length, nOwnVars) : 0 }))}</p><div class="sw tight">${vars.slice(0, 48).map((x) => `<button type="button" class="dot lg ${own.byVid.has(x.id) ? 'own' : ''}" style="background:${x.cf ? `var(--c-${x.cf})` : 'transparent'}" data-act="chk-variant" data-id="${esc(x.id)}" title="${esc([x.col, x.ser, x.y].filter(Boolean).join(' · '))}" aria-label="${esc([x.col, x.ser, x.y].filter(Boolean).join(' · '))}"></button>`).join('')}</div>` : ''}
   ${shopScore(pick, vars)}
   ${own1.length ? `<p class="small">${esc(t('chk.youHave'))}: ${own1.map((o) => `${o.snap.col || cname(o.snap.cf)}${o.qty > 1 ? ' ×' + o.qty : ''}`).join(', ')}</p>` : ''}
-  <button type="button" class="btn light" data-act="chk-add">${esc(level === 'red' ? t('chk.addAnyway') : t('add.title'))}</button></div>`;
+  <div class="row wrap"><button type="button" class="btn light" data-act="chk-add">${esc(level === 'red' ? t('chk.addAnyway') : t('add.title'))}</button>
+  <button type="button" class="btn light" data-act="wish-add" data-key="${esc(pick.key)}" data-name="${esc(pick.name)}" data-cf="${esc(c.cf || '')}">${isWished(pick.key, c.cf) ? '♥ ' + esc(t('wish.in')) : '♡ ' + esc(t('wish.add'))}</button></div></div>`;
 }
 
 acts['th-guide'] = () => {

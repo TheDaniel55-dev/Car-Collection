@@ -358,6 +358,12 @@
  "chk.recent": "Recently checked",
  "chk.recentClear": "Clear",
  "stats.dupList": "Cars you own more than once",
+ "wish.title": "Wishlist",
+ "wish.add": "Add to wishlist",
+ "wish.added": "Added to wishlist",
+ "wish.in": "In your wishlist",
+ "wish.remove": "Remove from wishlist",
+ "col.refresh": "Show other suggestions",
  "update.available": "Update available",
  "update.reload": "Reload"
 }
