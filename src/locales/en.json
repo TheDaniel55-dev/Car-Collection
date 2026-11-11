@@ -350,6 +350,14 @@
  "th.g.5": "Older Treasure Hunts follow the rules of their own year; a 1998 car cannot be a Super. Look the year up before deciding.",
  "th.g.6": "If unsure, photograph the base, sides, wheels and packaging and compare with a reliable reference before paying a high price.",
  "th.src": "Summary of public collector guides. Details can differ by year, so always confirm online.",
+ "f.typeAuto": "Automatic (from series)",
+ "bk.remindNever": "You have {n} cars saved only on this phone and no backup yet.",
+ "bk.remindOld": "Your last backup was {d} days ago.",
+ "bk.now": "Back up now",
+ "bk.later": "Later",
+ "chk.recent": "Recently checked",
+ "chk.recentClear": "Clear",
+ "stats.dupList": "Cars you own more than once",
  "update.available": "Update available",
  "update.reload": "Reload"
 }

@@ -150,3 +150,4 @@ body.shop .vd p{font-size:1.25rem}
 .cmprow .cv{word-break:break-word}.cmprow.diff{background:color-mix(in srgb,var(--warn) 14%,transparent);border-radius:8px}.cmprow.diff .cv{font-weight:600}
 .cmpsum{margin:10px 0}.cmpsum h2{font-size:1.6rem}
 .guide{padding-left:20px;display:flex;flex-direction:column;gap:8px}
+.cmpimg{display:block;width:100%;max-width:120px;border-radius:10px;margin-top:6px}.warnbox{border:1px solid var(--warn)}

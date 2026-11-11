@@ -350,6 +350,14 @@
  "th.g.5": "Treasure Hunt-urile mai vechi respectă regulile anului lor; o mașină din 1998 nu poate fi Super. Caută anul înainte să decizi.",
  "th.g.6": "Dacă nu ești sigur, fotografiază baza, laturile, roțile și ambalajul și compară cu o sursă de încredere înainte să plătești mult.",
  "th.src": "Rezumat după ghiduri publice pentru colecționari. Detaliile diferă de la an la an, deci confirmă mereu online.",
+ "f.typeAuto": "Automat (după serie)",
+ "bk.remindNever": "Ai {n} mașini salvate doar pe acest telefon și nicio copie de siguranță.",
+ "bk.remindOld": "Ultima copie de siguranță a fost acum {d} zile.",
+ "bk.now": "Fă copie acum",
+ "bk.later": "Mai târziu",
+ "chk.recent": "Verificate recent",
+ "chk.recentClear": "Șterge",
+ "stats.dupList": "Mașini pe care le ai de mai multe ori",
  "update.available": "Actualizare disponibilă",
  "update.reload": "Reîncarcă"
 }

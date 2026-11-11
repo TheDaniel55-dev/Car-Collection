@@ -39,6 +39,9 @@ const q = $('#add-q'); if (!q) fail('add sheet has no search input');
 q.value = 'GRX20'; q.dispatchEvent(new w.Event('input', { bubbles: true })); await wait(200);
 if (!/Supra/i.test($('.sheet-layer.on')?.textContent || '')) fail('seed car GRX20 not found in add search');
 console.log('add search finds seed car: ok');
+click($('[data-act="add-manual"]')); await wait(150);
+if (!$('#f-ty')) fail('manual add form has no car type selector');
+console.log('manual add has type selector: ok');
 // shop check shows a rarity score without adding the car
 click($('#nav [data-v="chk"]')); await wait(150);
 const cq = $('#chk-q'); if (!cq) fail('check tab has no search input');

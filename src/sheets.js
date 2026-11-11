@@ -137,6 +137,7 @@ function formHTML() {
        ${field('f-colname', t('f.colourName'), d.col, '')}
        <div class="grid2">${field('f-ser', t('f.series'), d.ser, 'data-in="f-dup"')}${field('f-y', t('f.year'), d.y || '', 'inputmode="numeric"')}</div>
        <div class="grid2">${field('f-cy', t('f.castYear'), d.cy || '', 'inputmode="numeric"')}${field('f-made', t('f.made'), d.made, 'list="countries"')}</div>
+       <label class="field"><span>${esc(t('type'))}</span><select id="f-ty"><option value="">${esc(t('f.typeAuto'))}</option>${['m', 'ex', 'p', 'th', 'sth', 'cv', 'rlc', 'er'].map((k) => `<option value="${k}" ${d.ty === k ? 'selected' : ''}>${esc(t('type.' + k))}</option>`).join('')}</select></label>
        <datalist id="countries"><option>Malaysia</option><option>Thailand</option><option>China</option><option>Indonesia</option><option>Vietnam</option></datalist>`;
   const baseMissing = locked && !d.base ? field('f-base', t('f.baseLearn'), '', 'class="mono" autocapitalize="characters"') : '';
   return `${A.edit ? '' : `<button type="button" class="link" data-act="add-back2">‹ ${esc(t('back'))}</button>`}
@@ -154,7 +155,7 @@ function readForm() {
   const d = A.draft; const g = (id) => ($('#' + id)?.value ?? '').trim();
   if (!A.vid || A.edit) {
     d.name = g('f-name') || d.name; d.base = g('f-base'); d.toy = g('f-toy'); d.col = g('f-colname'); d.ser = g('f-ser');
-    d.y = Number(g('f-y')) || 0; d.cy = Number(g('f-cy')) || 0; d.made = g('f-made');
+    d.y = Number(g('f-y')) || 0; d.cy = Number(g('f-cy')) || 0; d.made = g('f-made'); d.ty = $('#f-ty')?.value || '';
     if (!d.cf && d.col) d.cf = colorFamily(d.col);
   } else {
     if (!d.base) d.base = g('f-base');

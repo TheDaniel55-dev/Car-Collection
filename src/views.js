@@ -76,13 +76,24 @@ function listHTML() {
   }).join('');
 }
 
+const DAY = 86400000;
+function backupBanner(total) {
+  const p = S.profile; if (total < 3 || (p.bkSnooze || 0) > Date.now()) return '';
+  const last = p.lastBackup || 0; const days = last ? Math.floor((Date.now() - last) / DAY) : 0;
+  if (last && days < 30) return '';
+  const msg = last ? t('bk.remindOld', { d: days }) : t('bk.remindNever', { n: total });
+  return `<div class="card warnbox"><b>⚠ ${esc(msg)}</b><div class="row wrap"><button type="button" class="btn s" data-act="bk-now">${esc(t('bk.now'))}</button><button type="button" class="btn s" data-act="bk-later">${esc(t('bk.later'))}</button></div></div>`;
+}
+acts['bk-now'] = () => { S.tab = 'set'; S.shop = false; hooks.refresh(); window.scrollTo(0, 0); };
+acts['bk-later'] = async () => { S.profile.bkSnooze = Date.now() + 7 * DAY; await saveProfile(); hooks.refresh(); };
+
 export function collectionHTML() {
   const total = own.list.reduce((a, o) => a + o.qty, 0);
   const brands = new Map();
   for (const o of own.list) { const b = brandOf(o.snap.name); brands.set(b, (brands.get(b) || 0) + o.qty); }
   const sug = suggestions();
   const greet = S.profile.name ? t('col.hi', { n: S.profile.name }) : t('app.name');
-  return `<header class="hdr"><div><h1>${esc(t('app.name'))}</h1><div class="mu">${esc(greet)} · ${esc(t('col.count', { n: total, m: own.byKey.size }))}</div></div></header>
+  return `${backupBanner(total)}<header class="hdr"><div><h1>${esc(t('app.name'))}</h1><div class="mu">${esc(greet)} · ${esc(t('col.count', { n: total, m: own.byKey.size }))}</div></div></header>
   ${sug.length ? `<div class="card"><b>${esc(t('col.suggest'))}</b>${sug.map((c) => `<button type="button" class="row linkrow pad" data-act="add-casting" data-key="${esc(c.key)}"><span class="g"><b>${esc(c.name)}</b><span class="mu">${esc(c.brand)}</span></span><span class="mu">+</span></button>`).join('')}</div>` : ''}
   <input class="search" data-in="col-q" placeholder="${esc(t('col.search'))}" value="${esc(S.f.q)}" aria-label="${esc(t('col.search'))}" autocomplete="off">
   <div class="chips" id="col-chips">${chipsHTML(brands)}</div>
@@ -107,7 +118,7 @@ export function checkHTML() {
   const c = S.chk;
   return `${S.shop ? '' : hdr(t('chk.title'), t('chk.sub'))}
   <div class="row wrap"><button type="button" class="btn s ${S.shop ? 'exit' : ''}" data-act="shop-toggle">${esc(S.shop ? t('shop.exit') : '🛒 ' + t('shop.title'))}</button>${S.shop ? '' : `<button type="button" class="btn s" data-act="cmp-open">⚖ ${esc(t('cmp.open'))}</button>`}</div>
-  <input id="chk-q" class="search ${S.shop ? 'huge' : ''}" data-in="chk-q" placeholder="${esc(t('chk.ph'))}" value="${esc(c.q)}" autocomplete="off" autocapitalize="characters" enterkeyhint="search" aria-label="${esc(t('chk.ph'))}">
+  <input id="chk-q" class="search ${S.shop ? 'huge' : ''}" data-in="chk-q" data-ch="chk-q" placeholder="${esc(t('chk.ph'))}" value="${esc(c.q)}" autocomplete="off" autocapitalize="characters" enterkeyhint="search" aria-label="${esc(t('chk.ph'))}">
   <div class="row wrap ${S.shop ? 'hide-shop' : ''}">
     <label class="btn s file">🚗 ${esc(t('add.carPhoto'))}<input type="file" accept="image/*" class="vh" data-ch="chk-photo"></label>
     <label class="btn s file">📷 ${esc(t('add.scan'))}<input type="file" accept="image/*" class="vh" data-ch="chk-ocr"></label>
@@ -148,7 +159,7 @@ function shopScore(pick, vars) {
 
 function checkResult() {
   const c = S.chk;
-  if (!c.q.trim()) return `<p class="mu">${esc(t('chk.hint'))}</p>`;
+  if (!c.q.trim()) return `<p class="mu">${esc(t('chk.hint'))}</p>${recentHTML()}`;
   const found = searchCastings(c.q, 5);
   if (!found.length) {
     return `<div class="vd amber"><h2>${esc(t('chk.nf'))}</h2><p>${esc(t('chk.nfText'))}</p><button type="button" class="btn light" data-act="open-add">${esc(t('add.manual'))}</button></div>`;
@@ -173,6 +184,24 @@ function checkResult() {
 acts['th-guide'] = () => {
   openSheet(`<h2>${esc(t('th.title'))}</h2><ul class="guide">${[1, 2, 3, 4, 5, 6].map((i) => `<li>${esc(t('th.g.' + i))}</li>`).join('')}</ul><p class="mu">${esc(t('th.src'))}</p><button type="button" class="btn s" data-act="sheet-close">${esc(t('close'))}</button>`);
 };
+
+function recentHTML() {
+  const rec = S.profile.recent || [];
+  if (!rec.length) return '';
+  return `<div class="card"><div class="row"><b class="g">${esc(t('chk.recent'))}</b><button type="button" class="pl" data-act="chk-recent-clear">${esc(t('chk.recentClear'))}</button></div>
+  <div class="chips wrapc">${rec.map((r) => `<button type="button" class="pl" data-act="chk-recent" data-key="${esc(r.key)}" data-cf="${esc(r.cf || '')}" data-name="${esc(r.name)}">${r.cf ? dot(r.cf) + ' ' : ''}${esc(r.name)}</button>`).join('')}</div></div>`;
+}
+chs['chk-q'] = async (el) => {
+  const q = el.value.trim(); if (q.length < 3) return;
+  const pick = searchCastings(q, 5).find((x) => x.key === S.chk.pick) || searchCastings(q, 1)[0];
+  if (!pick) return;
+  const rec = (S.profile.recent || []).filter((r) => !(r.key === pick.key && (r.cf || '') === (S.chk.cf || '')));
+  rec.unshift({ key: pick.key, name: pick.name, cf: S.chk.cf || '', ts: Date.now() });
+  S.profile.recent = rec.slice(0, 12);
+  await saveProfile();
+};
+acts['chk-recent'] = (el) => { Object.assign(S.chk, { q: el.dataset.name, cf: el.dataset.cf || '', pick: el.dataset.key, vid: null, ser: '' }); hooks.refresh(); };
+acts['chk-recent-clear'] = async () => { S.profile.recent = []; await saveProfile(); hooks.refresh(); };
 
 const redoCheck = () => { const r = $('#chk-res'); if (r) r.innerHTML = checkResult(); };
 ins['chk-q'] = (el) => { S.chk.q = el.value; S.chk.pick = null; S.chk.vid = null; S.chk.ser = ''; redoCheck(); };
@@ -253,7 +282,7 @@ export function statsHTML() {
   const dupes = list.filter((o) => o.qty > 1).reduce((a, o) => a + o.qty - 1, 0);
   return `${hdr(t('stats.title'))}
   <div class="stats">${[[t('stats.cars'), cars], [t('stats.models'), own.byKey.size], third].map(([l, n]) => `<div class="stat"><b>${n}</b><span>${esc(l)}</span></div>`).join('')}</div>
-  ${dupes ? `<p class="warn">⚠ ${esc(t('stats.dupes', { n: dupes }))}</p>` : ''}
+  ${dupes ? `<p class="warn">⚠ ${esc(t('stats.dupes', { n: dupes }))}</p><div class="card"><h3>${esc(t('stats.dupList'))}</h3>${list.filter((o) => o.qty > 1).sort((a, b) => b.qty - a.qty).slice(0, 30).map((o) => `<button type="button" class="row linkrow pad" data-act="open-car" data-id="${o.id}">${dot(o.snap.cf)}<span class="g">${esc(o.snap.name)} <span class="mu">${esc(o.snap.col || cname(o.snap.cf))}</span></span><b>×${o.qty}</b></button>`).join('')}</div>` : ''}
   <div class="card row"><div class="g"><div class="mu">${esc(t('stats.rarity'))} <span class="chip">${esc(t('rarity.estimate'))}</span></div><div class="bignum">${avg}</div></div><button type="button" class="pl" data-act="rarity-how" aria-label="${esc(t('rarity.how'))}">?</button></div>
   <div class="card"><h3>${esc(t('stats.rarest'))}</h3>${top.map(({ o, r }) => `<button type="button" class="row linkrow pad" data-act="open-car" data-id="${o.id}">${dot(o.snap.cf)}<span class="g">${esc(o.snap.name)}</span>${pill(o.snap)}</button>`).join('') || `<p class="mu">${esc(t('stats.nodata'))}</p>`}</div>
   <div class="card"><h3>${esc(t('stats.byTier'))}</h3>${bars(tiers)}</div>
@@ -319,7 +348,8 @@ acts['db-update'] = async () => {
 
 /* ---- backup ---- */
 let pending = null;
-acts['bk-plain'] = async () => { const r = await saveFile(`car-collection-${S.profile.name || 'backup'}-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(buildBackup())); if (r !== 'cancelled') toast(t('bk.saved')); };
+const markBackup = async () => { S.profile.lastBackup = Date.now(); S.profile.bkSnooze = 0; await saveProfile(); };
+acts['bk-plain'] = async () => { const r = await saveFile(`car-collection-${S.profile.name || 'backup'}-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(buildBackup())); if (r !== 'cancelled') { await markBackup(); toast(t('bk.saved')); } };
 acts['bk-csv'] = async () => { await saveFile(`car-collection-${new Date().toISOString().slice(0, 10)}.csv`, toCSV(), 'text/csv'); toast(t('bk.saved')); };
 acts['bk-enc'] = () => openSheet(`<h2>${esc(t('bk.export'))}</h2><p class="mu">${esc(t('bk.encHelp'))}</p>${field('bk-pw', t('bk.password'), '', 'type="password" autocomplete="new-password"')}${field('bk-pw2', t('bk.password2'), '', 'type="password" autocomplete="new-password"')}<p id="bk-err" class="warn"></p><button type="button" class="btn primary" data-act="bk-enc-go">${esc(t('bk.export'))}</button>`);
 acts['bk-enc-go'] = async () => {
@@ -328,7 +358,7 @@ acts['bk-enc-go'] = async () => {
   if (a !== b) { $('#bk-err').textContent = t('bk.mismatch'); return; }
   const env = await exportEncrypted(a);
   const r = await saveFile(`car-collection-${S.profile.name || 'backup'}-${new Date().toISOString().slice(0, 10)}.ccbackup.json`, JSON.stringify(env));
-  closeSheet(); if (r !== 'cancelled') toast(t('bk.saved'));
+  closeSheet(); if (r !== 'cancelled') { await markBackup(); toast(t('bk.saved')); }
 };
 chs['bk-file'] = async (el) => { const f = el.files[0]; if (!f) return; el.value = ''; startImport(await f.text()); };
 acts['bk-paste'] = () => openSheet(`<h2>${esc(t('bk.paste'))}</h2><p class="mu">${esc(t('bk.pasteHelp'))}</p><textarea id="bk-text" rows="8" class="area"></textarea><button type="button" class="btn primary" data-act="bk-paste-go">${esc(t('bk.import'))}</button>`);
