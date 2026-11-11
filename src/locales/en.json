@@ -392,6 +392,7 @@
  "ver.r.offline": "No internet connection, cannot check now.",
  "ver.r.unsupported": "This browser manages updates by itself (no offline mode here).",
  "ver.help": "The number grows with every change. If the app stays on an old version, use “Clean reload”: it reloads the app files and keeps your cars and the database.",
+ "f.alt": "Paint run",
  "update.available": "Update available",
  "update.reload": "Reload"
 }

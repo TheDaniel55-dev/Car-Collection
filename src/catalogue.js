@@ -1,5 +1,5 @@
 // In-memory catalogue (loaded from IndexedDB) + sync with the published dataset.
-import { norm, castKey, codeKey } from '../shared/text.js';
+import { norm, castKey, codeKey, splitAlt } from '../shared/text.js';
 import { brandOf } from '../shared/brands.js';
 import { colorFamily } from '../shared/colors.js';
 import * as db from './db.js';
@@ -17,6 +17,7 @@ export function rowToVariant(r) {
   FIELDS.forEach((f, i) => { v[f] = r[i] ?? ''; });
   v.y = Number(v.y) || 0;
   v.cy = Number(v.cy) || 0;
+  const sp = splitAlt(v.name); if (sp.alt) { v.name = sp.name; v.cn = sp.alt; } // "(2nd Color)" is the same model
   v.k = castKey(v.name);
   v.cf = colorFamily(v.col);
   v.s = norm(`${v.name} ${v.toy} ${v.base} ${v.ser} ${v.col}`);
@@ -28,6 +29,9 @@ export function indexCatalogue(list) {
   cat.byId = new Map(); cat.byKey = new Map(); cat.byCode = new Map(); cat.castings = new Map();
   const codes = new Set();
   for (const v of list) {
+    // Rows saved by an older version still carry "(2nd Color)" in the name: fold them into the base model on every load.
+    if (!v.cn) { const sp = splitAlt(v.name); if (sp.alt) { v.name = sp.name; v.cn = sp.alt; } }
+    v.k = castKey(v.name);
     cat.byId.set(v.id, v);
     (cat.byKey.get(v.k) || cat.byKey.set(v.k, []).get(v.k)).push(v);
     for (const raw of [v.toy, v.base]) {

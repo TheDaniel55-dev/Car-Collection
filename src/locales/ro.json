@@ -392,6 +392,7 @@
  "ver.r.offline": "Nu e internet, nu pot verifica acum.",
  "ver.r.unsupported": "Acest browser își gestionează singur actualizările (aici nu există mod offline).",
  "ver.help": "Numărul crește la fiecare modificare. Dacă aplicația rămâne pe o versiune veche, folosește „Reîncărcare curată”: reîncarcă fișierele aplicației și păstrează mașinile și baza de date.",
+ "f.alt": "Versiune de vopsire",
  "update.available": "Actualizare disponibilă",
  "update.reload": "Reîncarcă"
 }

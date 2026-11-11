@@ -9,7 +9,15 @@ export const norm = (s) =>
     .trim();
 
 /** Casting key: normalised name without spaces. Same model => same key. */
-export const castKey = (s) => norm(s).replace(/ /g, '');
+/** The wiki lists a second paint of the same casting as "Name (2nd Color)". That is the same model, so the suffix is split off. */
+const ALT_RE = /\s*\(\s*\d+(?:st|nd|rd|th)\s+colou?r\b[^)]*\)\s*$/i;
+export function splitAlt(name) {
+  const s = String(name ?? '').trim(); const m = ALT_RE.exec(s);
+  if (!m || m.index === 0) return { name: s, alt: '' };
+  return { name: s.slice(0, m.index).trim(), alt: m[0].replace(/^\s*\(|\)\s*$/g, '').trim() };
+}
+export const baseName = (s) => splitAlt(s).name;
+export const castKey = (s) => norm(baseName(s)).replace(/ /g, '');
 
 /** Code key: uppercase letters and digits only (GRX20, U48N). */
 export const codeKey = (s) => String(s ?? '').toUpperCase().replace(/[^A-Z0-9]/g, '');

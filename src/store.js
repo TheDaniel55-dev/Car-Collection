@@ -1,6 +1,6 @@
 // App state: profiles (local "accounts"), owned cars, options.
 import * as db from './db.js';
-import { castKey, norm, codeKey } from '../shared/text.js';
+import { castKey, norm, codeKey, splitAlt } from '../shared/text.js';
 import { colorFamily } from '../shared/colors.js';
 import { classifyType } from '../shared/classify.js';
 import { cat, learnCode } from './catalogue.js';
@@ -36,8 +36,31 @@ export async function initStore() {
   S.locked = !!S.profile.pin;
 }
 
+/**
+ * Older versions treated "Name (2nd Color)" as another model. Fold such cars (and wishlist entries) into the base model;
+ * the "2nd Color" text is kept as snap.alt. Safe to run on every load: it changes nothing once migrated.
+ */
+export async function migrateAlt(list, profile) {
+  let n = 0;
+  for (const o of list) {
+    const sp = splitAlt(o.snap.name); const key = castKey(o.snap.name);
+    if (!sp.alt && o.snap.key === key) continue;
+    o.snap = { ...o.snap, name: sp.name || o.snap.name, key, ...(sp.alt && !o.snap.alt ? { alt: sp.alt } : {}) };
+    await db.put('owned', o);
+    if (o.snap.base) await learnCode(o.snap.base, key);
+    n++;
+  }
+  if (profile?.wish?.length) {
+    let ch = false;
+    profile.wish = profile.wish.map((w) => { const sp = splitAlt(w.name); const k = castKey(w.name || ''); if (!w.name || (!sp.alt && w.key === k)) return w; ch = true; return { ...w, name: sp.name, key: k }; });
+    if (ch) { await db.put('profiles', profile); n++; }
+  }
+  return n;
+}
+
 export async function reloadOwned() {
   const list = (await db.getAllBy('owned', 'pid', S.profile.id)).sort((a, b) => (a.added || 0) - (b.added || 0));
+  await migrateAlt(list, S.profile);
   indexOwned(list);
 }
 
@@ -81,7 +104,7 @@ export function makeSnap(src) {
     ser: String(src.ser || '').trim(), y: Number(src.y) || 0, cy: Number(src.cy) || 0,
     toy: codeKey(src.toy), base: codeKey(src.base), num: String(src.num || '').trim(),
     ty: src.ty || classifyType(src.ser), made: String(src.made || '').trim(),
-    tp: String(src.tp || '').trim(), wh: String(src.wh || '').trim(),
+    tp: String(src.tp || '').trim(), wh: String(src.wh || '').trim(), alt: String(src.alt || '').trim(),
   };
 }
 

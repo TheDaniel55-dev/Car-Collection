@@ -15,6 +15,8 @@ const { rarityBreakdown, tierOf } = await L('/src/rarity.js');
 const { encryptJSON, decryptJSON } = await L('/src/crypto.js');
 const cat = (await L('/src/catalogue.js'));
 const S = await L('/src/search.js');
+const T = await L('/shared/text.js');
+const St = await L('/src/store.js');
 
 console.log('text / colours / types');
 await ok('castKey ignores spaces/case/accents', () => assert.equal(castKey("'20 Toyota GR Supra"), castKey("'20  toyota gr SUPRA")));
@@ -78,6 +80,40 @@ await ok('hand-added car is found again by its card (toy) code, e.g. a Premium H
   assert.equal(S.verdict(manual.snap.key, { cf: 'blue' }).level, 'amber');
 });
 await ok('OCR text parsing finds a base code', () => { const r = S.parseOcrText('MATTEL 2019 GRX2O MALAYSIA U48N'); assert.ok(JSON.stringify(r).toUpperCase().includes('GRX20'), JSON.stringify(r)); });
+
+console.log('"(2nd Color)" is the same model');
+await ok('splitAlt / castKey fold second paints into the base model', () => {
+  const { splitAlt } = T;
+  assert.deepEqual(splitAlt('Bugatti Veyron (2nd Color)'), { name: 'Bugatti Veyron', alt: '2nd Color' });
+  assert.equal(splitAlt("'17 Pagani Huayra Roadster (2nd Color - Zamac)").name, "'17 Pagani Huayra Roadster");
+  assert.equal(castKey('Bugatti Veyron (3rd color)'), castKey('Bugatti Veyron'));
+  assert.equal(splitAlt('Nissan Skyline GT-R (R34)').alt, '', 'real model names in brackets stay');
+  assert.notEqual(castKey('Nissan Skyline GT-R (R34)'), castKey('Nissan Skyline GT-R (R32)'));
+});
+await ok('catalogue rows with (2nd Color) become variants of one casting', () => {
+  const a = cat.rowToVariant(['a1', 'Bugatti Veyron', 'K7685', '', 'Mystery Car', 2007, 'm', '170', '', '', '', '']);
+  const b = cat.rowToVariant(['a2', 'Bugatti Veyron (2nd Color)', 'K7685', '', 'Mystery Car', 2007, 'm', '170', '', '', '', '']);
+  assert.equal(a.k, b.k); assert.equal(b.name, 'Bugatti Veyron'); assert.equal(b.cn, '2nd Color');
+  cat.indexCatalogue([a, b]);
+  assert.equal(S.variantsOf(a.k).length, 2); assert.equal(cat.cat?.castings?.size ?? cat.cat.castings.size, 1);
+  // a row stored by an older version (name still has the suffix, old key) is folded on load too
+  cat.indexCatalogue([{ ...a }, { ...b, name: 'Bugatti Veyron (2nd Color)', k: 'bugattiveyron2ndcolor', cn: undefined }]);
+  assert.equal(cat.cat.castings.size, 1);
+  cat.indexCatalogue(rows);
+});
+await ok('migration folds saved cars and wishlist entries, and is a no-op the second time', async () => {
+  const old = { id: 'o1', pid: 'p', vid: null, qty: 1, prod: '', snap: { name: 'Bugatti Veyron (2nd Color)', key: 'bugattiveyron2ndcolor', cf: 'blue', base: 'ZZV01' } };
+  const keep = { id: 'o2', pid: 'p', vid: null, qty: 1, prod: '', snap: { name: 'Bugatti Veyron', key: castKey('Bugatti Veyron'), cf: 'black' } };
+  const prof = { id: 'p', wish: [{ key: 'bugattiveyron2ndcolor', name: 'Bugatti Veyron (2nd Color)', cf: 'red' }] };
+  const n1 = await St.migrateAlt([old, keep], prof);
+  assert.ok(n1 >= 2, 'migrated ' + n1);
+  assert.equal(old.snap.name, 'Bugatti Veyron'); assert.equal(old.snap.key, keep.snap.key); assert.equal(old.snap.alt, '2nd Color');
+  assert.equal(prof.wish[0].key, keep.snap.key); assert.equal(prof.wish[0].name, 'Bugatti Veyron');
+  assert.equal(await St.migrateAlt([old, keep], prof), 0);
+  S.indexOwned([old, keep]);
+  assert.equal(S.verdict(keep.snap.key, { cf: 'blue' }).level, 'red', 'blue Veyron is now recognised as owned');
+  assert.equal(S.verdict(keep.snap.key, { cf: 'red' }).level, 'amber');
+});
 
 await server.close();
 console.log(process.exitCode ? 'FAILED' : `all ${n} logic tests passed`);
