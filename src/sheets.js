@@ -1,5 +1,5 @@
 // Bottom sheets: add flow, car detail, edit, rarity, onboarding, about, profiles.
-import { esc, castKey, codeKey } from '../shared/text.js';
+import { esc, castKey, codeKey, norm } from '../shared/text.js';
 import { brandOf, CATEGORIES } from '../shared/brands.js';
 import { PALETTE, FAMILIES, colorFamily } from '../shared/colors.js';
 import { classifyType } from '../shared/classify.js';
@@ -27,9 +27,18 @@ export function openAdd(pre = {}) {
   if (pre.key) pickCasting(pre.key);
 }
 
+const codeLike = (q) => (/\d/.test(q) && !/\s/.test(q.trim()) && q.trim().length >= 4 ? q.trim().toUpperCase() : '');
+
+/** Nothing found: say why, and offer the manual route with the typed code already filled in. */
+function notFoundHTML() {
+  const code = codeLike(A.q);
+  return `<div class="card nf"><b>${esc(t('add.nf.title', { q: A.q.trim() }))}</b><p class="mu">${esc(t('add.nf.why'))}</p>
+  <button type="button" class="btn primary" data-act="add-manual">${esc(code ? t('add.nf.btnCode', { c: code }) : t('add.nf.btn'))}</button></div>`;
+}
+
 function resultRows() {
   const list = A.q ? searchCastings(A.q, 7) : [];
-  if (!list.length) return A.q ? `<p class="mu">${esc(t('add.none'))}</p>` : `<p class="mu">${esc(t('add.hint'))}</p>`;
+  if (!list.length) return A.q ? notFoundHTML() : `<p class="mu">${esc(t('add.hint'))}</p>`;
   return list.map((c) => {
     const n = ownedOf(c.key).reduce((a, o) => a + o.qty, 0);
     return `<button type="button" class="card row it" data-act="add-pick" data-key="${esc(c.key)}"><span class="g"><b>${esc(c.name)}</b><span class="mu">${esc([c.brand, years(c), c.count ? t('add.nvar', { n: c.count }) : t('add.yours')].filter(Boolean).join(' · '))}</span></span>${n ? `<span class="chip ok">✓ ×${n}</span>` : ''}</button>`;
@@ -37,7 +46,7 @@ function resultRows() {
 }
 
 function searchHTML() {
-  return `<h2>${esc(t('add.title'))}</h2>
+  return `<p class="stepl">${esc(t('add.s1'))}</p><h2>${esc(t('add.title'))}</h2>
   <input id="add-q" class="search" data-in="add-q" placeholder="${esc(t('add.ph'))}" value="${esc(A.q)}" autocomplete="off" autocapitalize="characters" enterkeyhint="search">
   <div class="row wrap">
     <label class="btn s file">📷 ${esc(t('add.scan'))}<input type="file" accept="image/*" class="vh" data-ch="add-ocr"></label>
@@ -45,7 +54,7 @@ function searchHTML() {
   </div>
   ${A.cf ? `<p class="mu">${dot(A.cf)} ${esc(t('add.colourDetected', { c: cname(A.cf) }))}</p>` : ''}
   <div id="add-res" class="stack">${resultRows()}</div>
-  <button type="button" class="btn s" data-act="add-manual">${esc(t('add.manual'))}</button>`;
+  <div class="card manualcta"><b>${esc(t('add.cantFind'))}</b><p class="mu">${esc(t('add.cantFindText'))}</p><button type="button" class="btn s" data-act="add-manual">${esc(t('add.manual'))}</button></div>`;
 }
 
 ins['add-q'] = (el) => { if (!A) return; A.q = el.value; $('#add-res').innerHTML = resultRows(); };
@@ -96,18 +105,19 @@ function variantsHTML() {
   const shown = vs.slice(0, 80);
   const rows = shown.map((v) => {
     const n = (own.byVid.get(v.id) || []).reduce((a, o) => a + o.qty, 0);
-    return `<button type="button" class="card row it ${A.cf && v.cf === A.cf ? 'hl' : ''}" data-act="add-variant" data-id="${esc(v.id)}">${dot(v.cf, 'lg')}<span class="g"><b>${esc(v.col || t('add.colourUnknown'))}</b><span class="mu">${esc([v.ser, v.y || '', typeLabel(v.ty)].filter(Boolean).join(' · '))}</span></span>${v.toy ? `<span class="chip mono">${esc(v.toy)}</span>` : ''}${n ? `<span class="chip ok">✓ ×${n}</span>` : ''}</button>`;
+    const title = [v.y || '', v.ser].filter(Boolean).join(' · ') || v.name;
+    return `<button type="button" class="card row it ${A.cf && v.cf === A.cf ? 'hl' : ''}" data-act="add-variant" data-id="${esc(v.id)}">${dot(v.cf, 'lg')}<span class="g"><b>${esc(title)}</b><span class="mu">${esc([v.col || t('add.colourUnknown'), typeLabel(v.ty)].filter(Boolean).join(' · '))}</span></span>${v.toy ? `<span class="chip mono">${esc(v.toy)}</span>` : ''}${n ? `<span class="chip ok">✓ ×${n}</span>` : ''}</button>`;
   }).join('');
   return `<button type="button" class="link" data-act="add-back">‹ ${esc(t('back'))}</button>
-  <h2>${esc(c.name)}</h2><p class="mu">${esc(t('add.pickVariant', { n: vs.length }))}</p>
-  ${palettePicker(A.cf, 'add-vcf', t('add.filterColour'))}
+  <p class="stepl">${esc(t('add.s2'))}</p><h2>${esc(c.name)}</h2><p class="mu">${esc(t('add.pickVariant', { n: vs.length }))}</p>
+  <div class="fieldlab">${esc(t('add.filterColour'))}${A.cf ? ` · ${esc(cname(A.cf))}` : ''}</div>${palettePicker(A.cf, 'add-vcf', t('add.filterColour'))}
   <div class="stack">${rows}</div>${vs.length > 80 ? `<p class="mu">${esc(t('add.more', { n: vs.length - 80 }))}</p>` : ''}
   <button type="button" class="btn s" data-act="add-notlisted">${esc(t('add.notListed'))}</button>`;
 }
 acts['add-back'] = () => { A.step = 'search'; setSheet(searchHTML()); };
 acts['add-vcf'] = (el) => { A.cf = A.cf === el.dataset.v ? '' : el.dataset.v; setSheet(variantsHTML()); };
 acts['add-notlisted'] = () => startForm({ name: A.casting.name, base: [...A.casting.bases][0] || '', cf: A.cf }, { manual: true });
-acts['add-manual'] = () => startForm({ name: A.q && !/\d/.test(A.q) ? A.q : '', base: /\d/.test(A.q) && !/\s/.test(A.q) ? A.q.toUpperCase() : '', cf: A.cf }, { manual: true });
+acts['add-manual'] = () => startForm({ name: A.q && !/\d/.test(A.q) ? A.q.trim() : '', toy: codeLike(A.q), cf: A.cf }, { manual: true });
 acts['add-variant'] = (el) => {
   const v = cat.byId.get(el.dataset.id); if (!v) return;
   // The colour is picked by the user (the catalogue colour is only shown as a hint).
@@ -124,30 +134,34 @@ function startForm(d, o = {}) {
 
 function formHTML() {
   const d = A.draft, rec = A.edit;
-  const v = A.vid ? cat.byId.get(A.vid) : null;
   const locked = !!A.vid && !rec;
-  const head = locked
-    ? `<div class="card row"><div class="g"><b>${esc(d.name)}</b><div class="mu">${esc([d.ser, d.y || ''].filter(Boolean).join(' · '))}</div></div>${d.toy ? `<span class="chip mono">${esc(d.toy)}</span>` : ''}</div>
-       <div class="fieldlab">${esc(t('f.colour'))}</div><p class="mu">${esc(t('add.pickColour'))}</p>${palettePicker(d.cf, 'f-col', t('f.colour'))}
-       ${d.wikiCol ? `<p class="mu">${esc(t('add.wikiColour', { c: d.wikiCol }))}</p>` : ''}
-       ${field('f-colname', t('f.colourName'), d.col, '')}`
-    : `${field('f-name', t('f.name'), d.name, 'data-in="f-dup" autocomplete="off"')}
-       <div class="grid2">${field('f-base', t('f.base'), d.base, 'class="mono" autocapitalize="characters" data-in="f-basefill"')}${field('f-toy', t('f.toy'), d.toy, 'class="mono" autocapitalize="characters"')}</div>
-       <div class="fieldlab">${esc(t('f.colour'))}</div>${palettePicker(d.cf, 'f-col', t('f.colour'))}
-       ${field('f-colname', t('f.colourName'), d.col, '')}
-       <div class="grid2">${field('f-ser', t('f.series'), d.ser, 'data-in="f-dup"')}${field('f-y', t('f.year'), d.y || '', 'inputmode="numeric"')}</div>
+  const picked = (d.ser || d.y) ? [d.ser, d.y || ''].filter(Boolean).join(' · ') : '';
+  // 1) which car
+  const car = locked
+    ? `<div class="card row"><div class="g"><b>${esc(d.name)}</b><div class="mu">${esc(picked)}</div></div>${d.toy ? `<span class="chip mono">${esc(d.toy)}</span>` : ''}</div>`
+    : `${field('f-name', t('f.name'), d.name, 'data-in="f-dup" autocomplete="off" placeholder="Bugatti Veyron"')}<div id="f-sugg"></div>
+       <div class="grid2">${field('f-toy', t('f.toy'), d.toy, 'class="mono" autocapitalize="characters" data-in="f-basefill" placeholder="HNT17"')}${field('f-base', t('f.base'), d.base, 'class="mono" autocapitalize="characters" data-in="f-basefill"')}</div>
+       <p class="mu small">${esc(t('add.codesHelp'))}</p>`;
+  // 2) colour: named chips, never bare circles
+  const colour = `<div class="fieldlab">${esc(t('f.colour'))}</div><p class="mu">${esc(t('add.pickColour'))}</p>${palettePicker(d.cf, 'f-col', t('f.colour'), true)}
+       ${locked && d.wikiCol ? `<p class="mu">${esc(t('add.wikiColour', { c: d.wikiCol }))}</p>` : ''}${field('f-colname', t('f.colourName'), d.col, '')}`;
+  // 3) how many / where
+  const basics = `<div class="grid2">${field('f-qty', t('f.qty'), rec?.qty || 1, 'type="number" min="1" inputmode="numeric"')}${opt('carded') ? `<label class="field"><span>${esc(t('f.status'))}</span><select id="f-st"><option value="loose" ${rec?.st !== 'carded' ? 'selected' : ''}>${esc(t('loose'))}</option><option value="carded" ${rec?.st === 'carded' ? 'selected' : ''}>${esc(t('carded'))}</option></select></label>` : '<span></span>'}</div>`;
+  const photo = `<div class="row wrap"><label class="btn s file">📷 ${esc(t('f.photo'))}<input type="file" accept="image/*" class="vh" data-ch="f-photo"></label>${(rec?.photo || A.photo) ? `<img id="f-prev" class="preview sm" src="${rec?.photo && !A.photo ? rec.photo : A.photo}" alt="">` : '<img id="f-prev" class="preview sm" alt="" hidden>'}</div>`;
+  // 4) the rest, folded away
+  const moreCar = locked ? (!d.base ? field('f-base', t('f.baseLearn'), '', 'class="mono" autocapitalize="characters"') : '')
+    : `<div class="grid2">${field('f-ser', t('f.series'), d.ser, 'data-in="f-dup"')}${field('f-y', t('f.year'), d.y || '', 'inputmode="numeric"')}</div>
        <div class="grid2">${field('f-cy', t('f.castYear'), d.cy || '', 'inputmode="numeric"')}${field('f-made', t('f.made'), d.made, 'list="countries"')}</div>
        <label class="field"><span>${esc(t('type'))}</span><select id="f-ty"><option value="">${esc(t('f.typeAuto'))}</option>${['m', 'ex', 'p', 'th', 'sth', 'cv', 'rlc', 'er'].map((k) => `<option value="${k}" ${d.ty === k ? 'selected' : ''}>${esc(t('type.' + k))}</option>`).join('')}</select></label>
        <datalist id="countries"><option>Malaysia</option><option>Thailand</option><option>China</option><option>Indonesia</option><option>Vietnam</option></datalist>`;
-  const baseMissing = locked && !d.base ? field('f-base', t('f.baseLearn'), '', 'class="mono" autocapitalize="characters"') : '';
+  const more = `<details class="more" ${rec ? 'open' : ''}><summary>${esc(t('add.moreSum'))}</summary><div class="stack">${moreCar}
+    ${opt('prod') ? field('f-prod', t('f.prod'), rec?.prod || '', 'class="mono" autocapitalize="characters" placeholder="U48N"') : ''}
+    ${field('f-loc', t('f.loc'), rec?.loc || '', '')}${field('f-note', t('f.note'), rec?.note || '', '')}</div></details>`;
   return `${A.edit ? '' : `<button type="button" class="link" data-act="add-back2">‹ ${esc(t('back'))}</button>`}
-  <h2>${esc(A.edit ? t('edit.title') : t('add.details'))}</h2>
-  <div id="f-dup"></div>${head}${baseMissing}
-  <div class="grid2">${opt('prod') ? field('f-prod', t('f.prod'), rec?.prod || '', 'class="mono" autocapitalize="characters" placeholder="U48N"') : ''}${field('f-qty', t('f.qty'), rec?.qty || 1, 'type="number" min="1" inputmode="numeric"')}</div>
-  ${opt('carded') ? `<label class="field"><span>${esc(t('f.status'))}</span><select id="f-st"><option value="loose" ${rec?.st !== 'carded' ? 'selected' : ''}>${esc(t('loose'))}</option><option value="carded" ${rec?.st === 'carded' ? 'selected' : ''}>${esc(t('carded'))}</option></select></label>` : ''}
-  ${field('f-loc', t('f.loc'), rec?.loc || '', '')}${field('f-note', t('f.note'), rec?.note || '', '')}
-  <div class="row wrap"><label class="btn s file">📷 ${esc(t('f.photo'))}<input type="file" accept="image/*" class="vh" data-ch="f-photo"></label>${(rec?.photo || A.photo) ? `<img id="f-prev" class="preview sm" src="${rec?.photo && !A.photo ? rec.photo : A.photo}" alt="">` : '<img id="f-prev" class="preview sm" alt="" hidden>'}</div>
-  <button type="button" class="btn primary" data-act="f-save">${esc(A.edit ? t('save') : t('f.add'))}</button>`;
+  <p class="stepl">${esc(A.edit ? t('edit.title') : t('add.s3'))}</p>
+  <h2>${esc(A.edit ? t('edit.title') : (locked ? d.name : t('add.details')))}</h2>
+  <div id="f-dup"></div><div class="stack formstack">${car}${colour}${basics}${photo}${more}</div>
+  <div class="savebar"><button type="button" class="btn primary" data-act="f-save">${esc(A.edit ? t('save') : t('f.add'))}</button></div>`;
 }
 acts['add-back2'] = () => { if (A.key && variantsOf(A.key).length && !A.manual) { A.step = 'variants'; setSheet(variantsHTML()); } else { A.step = 'search'; setSheet(searchHTML()); } };
 
@@ -164,7 +178,22 @@ function readForm() {
   return { prod: g('f-prod'), qty: Math.max(1, Number(g('f-qty')) || 1), st: $('#f-st')?.value || 'loose', loc: g('f-loc'), note: g('f-note') };
 }
 
+/** While typing a hand-made car's name, offer matching models from the catalogue so it joins the same model (duplicates, rarity). */
+function refreshSugg() {
+  const sg = $('#f-sugg'); if (!sg || !A || A.vid || A.edit) return;
+  const q = ($('#f-name')?.value || '').trim();
+  const list = q.length >= 3 ? searchCastings(q, 4).filter((c) => norm(c.name) !== norm(q)) : [];
+  sg.innerHTML = list.length ? `<p class="mu small">${esc(t('add.sugg'))}</p><div class="chips wrapc">${list.map((c) => `<button type="button" class="pl" data-act="f-usename" data-key="${esc(c.key)}">${esc(c.name)} · ${esc(c.count ? t('add.nvar', { n: c.count }) : t('add.yours'))}</button>`).join('')}</div>` : '';
+}
+acts['f-usename'] = (el) => {
+  const c = castingByKey(el.dataset.key); if (!c) return;
+  $('#f-name').value = c.name;
+  const b = $('#f-base'); if (b && !b.value && c.bases?.size === 1) b.value = [...c.bases][0];
+  refreshSugg(); refreshDup();
+};
+
 function refreshDup() {
+  refreshSugg();
   const box = $('#f-dup'); if (!box || !A?.draft || A.edit) return;
   const d = A.draft; const name = $('#f-name')?.value ?? d.name;
   if (!name) { box.innerHTML = ''; return; }
@@ -184,7 +213,7 @@ ins['f-basefill'] = (el) => {
 };
 acts['f-col'] = (el) => {
   A.draft.cf = A.draft.cf === el.dataset.v ? '' : el.dataset.v;
-  $$('.sw [data-act="f-col"]').forEach((b) => { const on = b.dataset.v === A.draft.cf; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+  $$('[data-act="f-col"]').forEach((b) => { const on = b.dataset.v === A.draft.cf; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
   refreshDup();
 };
 chs['f-photo'] = async (el) => {
@@ -192,7 +221,7 @@ chs['f-photo'] = async (el) => {
   try {
     const r = await readPhoto(f, opt('photo')); A.photo = r.url;
     const im = $('#f-prev'); im.src = r.url; im.hidden = false;
-    if (opt('auto') && r.cf && !A.draft.cf && (A.manual || A.edit)) { A.draft.cf = r.cf; $$('.sw [data-act="f-col"]').forEach((b) => b.classList.toggle('on', b.dataset.v === r.cf)); toast(t('add.colourDetected', { c: cname(r.cf) })); refreshDup(); }
+    if (opt('auto') && r.cf && !A.draft.cf && (A.manual || A.edit)) { A.draft.cf = r.cf; $$('[data-act="f-col"]').forEach((b) => b.classList.toggle('on', b.dataset.v === r.cf)); toast(t('add.colourDetected', { c: cname(r.cf) })); refreshDup(); }
   } catch { toast(t('err.photo')); }
 };
 

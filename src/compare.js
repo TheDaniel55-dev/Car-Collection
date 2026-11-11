@@ -83,9 +83,17 @@ function sideControls(k) {
   if (!sd || sd.none) return `<p class="mu">${esc(t('cmp.none'))}</p>`;
   const chips = sd.found.length > 1 ? `<div class="chips wrapc">${sd.found.map((f) => `<button type="button" class="pl ${f.key === sd.pick.key ? 'on' : ''}" data-act="cmp-pick" data-side="${k}" data-key="${esc(f.key)}">${esc(f.name)}</button>`).join('')}</div>` : '';
   const mine = sd.mine.length ? `<div class="fieldlab">${esc(t('cmp.mine'))}</div><div class="chips wrapc">${sd.mine.map((o) => `<button type="button" class="pl ${x.own === o.id ? 'on' : ''}" data-act="cmp-own" data-side="${k}" data-id="${esc(o.id)}">${dot(o.snap.cf)} ${esc(o.snap.col || cname(o.snap.cf))}${o.qty > 1 ? ' ×' + o.qty : ''}</button>`).join('')}</div>` : '';
-  const vars = sd.vars.length ? `<div class="fieldlab">${esc(t('cmp.pickVariant'))}</div><div class="sw tight">${sd.vars.slice(0, 48).map((v) => `<button type="button" class="dot lg ${x.vid === v.id && !x.own ? 'on' : ''}" style="background:${v.cf ? `var(--c-${v.cf})` : 'transparent'}" data-act="cmp-variant" data-side="${k}" data-id="${esc(v.id)}" title="${esc([v.ser, v.y].filter(Boolean).join(' · '))}" aria-label="${esc([v.ser, v.y].filter(Boolean).join(' · '))}"></button>`).join('')}</div>` : '';
+  // One readable row per version: year · series on top, colour hint and type below, toy code on the right.
+  const sorted = sd.vars.slice().sort((a, b) => (b.y || 0) - (a.y || 0));
+  const vrow = (v) => {
+    const on = x.vid === v.id && !x.own;
+    const n = (own.byVid.get(v.id) || []).reduce((a, o) => a + o.qty, 0);
+    const title = [v.y || '', v.ser].filter(Boolean).join(' · ') || v.name;
+    return `<button type="button" class="card row it vopt ${on ? 'sel' : ''}" data-act="cmp-variant" data-side="${k}" data-id="${esc(v.id)}" aria-pressed="${on}">${dot(v.cf, 'lg')}<span class="g"><b>${esc(title)}</b><span class="mu">${esc([v.col || t('add.colourUnknown'), typeLabel(v.ty)].filter(Boolean).join(' · '))}</span></span>${v.toy ? `<span class="chip mono">${esc(v.toy)}</span>` : ''}${n ? `<span class="chip ok">✓ ×${n}</span>` : ''}${on ? '<span class="chip pick">✔</span>' : ''}</button>`;
+  };
+  const vars = sorted.length ? `<div class="fieldlab">${esc(t('cmp.pickVariant'))} (${sorted.length})</div><p class="mu">${esc(t('cmp.pickVariantHelp'))}</p><div class="vlist stack">${sorted.slice(0, 60).map(vrow).join('')}</div>${sorted.length > 60 ? `<p class="mu">${esc(t('add.more', { n: sorted.length - 60 }))}</p>` : ''}` : '';
   const photo = `<div class="row wrap"><label class="btn s file">📷 ${esc(t('f.photo'))}<input type="file" accept="image/*" class="vh" data-ch="cmp-photo-${k}"></label>${sd.photo ? `<img class="preview sm" src="${sd.photo}" alt="">` : ''}</div>`;
-  return `${chips}${mine}${vars}${photo}<div class="fieldlab">${esc(t('chk.colour'))}</div>${palettePicker(x.cf, 'cmp-col-' + k, t('chk.colour'))}`;
+  return `${chips}${mine}${vars}${photo}<div class="fieldlab">${esc(t('chk.colour'))}</div>${palettePicker(x.cf, 'cmp-col-' + k, t('chk.colour'), true)}`;
 }
 
 function tableHTML() {

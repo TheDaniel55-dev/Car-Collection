@@ -69,6 +69,14 @@ await ok('manual (offline) car is searchable and verdicts work', () => {
   assert.equal(S.castingsForCode('ZZZ99').length, 1);
   assert.equal(S.verdict(manual.snap.key, { cf: 'green' }).level, 'red');
 });
+await ok('hand-added car is found again by its card (toy) code, e.g. a Premium HNT17', () => {
+  const manual = { id: 'm2', vid: null, qty: 1, prod: '', snap: { key: castKey('Bugatti Veyron'), name: 'Bugatti Veyron', cf: 'black', ser: '', base: '', toy: 'HNT17' } };
+  S.indexOwned([manual]);
+  assert.ok(S.castingsForCode('hnt-17').includes(manual.snap.key), 'toy code lookup');
+  assert.ok(S.searchCastings('HNT17').some((c) => c.key === manual.snap.key), 'search by toy code');
+  assert.equal(S.verdict(manual.snap.key, { cf: 'black' }).level, 'red');
+  assert.equal(S.verdict(manual.snap.key, { cf: 'blue' }).level, 'amber');
+});
 await ok('OCR text parsing finds a base code', () => { const r = S.parseOcrText('MATTEL 2019 GRX2O MALAYSIA U48N'); assert.ok(JSON.stringify(r).toUpperCase().includes('GRX20'), JSON.stringify(r)); });
 
 await server.close();

@@ -152,3 +152,22 @@ body.shop .vd p{font-size:1.25rem}
 .guide{padding-left:20px;display:flex;flex-direction:column;gap:8px}
 .cmpimg{display:block;width:100%;max-width:120px;border-radius:10px;margin-top:6px}.warnbox{border:1px solid var(--warn)}
 .linkbtn{background:none;border:0;color:inherit;font:inherit;text-align:left;display:flex;flex-direction:column;gap:2px;padding:0;cursor:pointer}
+/* friendlier add flow + compare version list */
+.stepl{margin:0;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ac);font-weight:700}
+.small{font-size:.82rem}
+.nf{border-color:var(--ac);display:flex;flex-direction:column;gap:8px}.nf p{margin:0}
+.manualcta{display:flex;flex-direction:column;gap:6px;margin-top:6px}.manualcta p{margin:0}
+.cpick{gap:6px}.pl.cp{display:inline-flex;align-items:center;gap:7px;padding:5px 12px 5px 6px}.pl.cp .dot{width:22px;height:22px}.pl.cp.on .dot{outline:2px solid var(--on);outline-offset:1px}
+.formstack{gap:12px}
+details.more{border:1px solid var(--ln);border-radius:14px;padding:10px 12px;background:var(--card)}
+details.more>summary{cursor:pointer;font-weight:600;font-size:.92rem;list-style:none}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::before{content:"＋ ";color:var(--ac)}details.more[open]>summary::before{content:"－ "}
+details.more[open]>summary{margin-bottom:10px}
+.savebar{position:sticky;bottom:0;margin:14px -4px 0;padding:10px 4px calc(6px + env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--bg) 78%,transparent)}
+.savebar .btn{width:100%}
+.vlist{max-height:300px;overflow-y:auto;padding:2px;overscroll-behavior:contain}
+.vopt{align-items:center}.vopt.sel{border-color:var(--ac);box-shadow:0 0 0 2px var(--ac) inset}
+.chip.pick{background:var(--ac);color:var(--on)}
+.vopt>.g>b,.vopt .g>b{white-space:normal}
+.card.row.vopt>.g>b{white-space:normal;overflow:visible;text-overflow:clip}

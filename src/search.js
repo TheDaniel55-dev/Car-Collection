@@ -14,6 +14,9 @@ export function indexOwned(list) {
     if (o.vid) (own.byVid.get(o.vid) || own.byVid.set(o.vid, []).get(o.vid)).push(o);
     const b = codeKey(o.snap.base);
     if (b) own.byBase.set(b, k);
+    // A card/toy code typed by hand (e.g. a Premium car missing from the catalogue) must also find the car again.
+    const tc = codeKey(o.snap.toy);
+    if (tc.length >= 4 && !own.byBase.has(tc)) own.byBase.set(tc, k);
     if (!cat.castings.has(k) && !own.extra.has(k)) {
       own.extra.set(k, { key: k, name: o.snap.name, n: norm(o.snap.name), brand: brandOf(o.snap.name), count: 0, y0: 9999, y1: 0, bases: new Set(b ? [b] : []), from: 'own' });
     }

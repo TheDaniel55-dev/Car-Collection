@@ -39,9 +39,20 @@ const q = $('#add-q'); if (!q) fail('add sheet has no search input');
 q.value = 'GRX20'; q.dispatchEvent(new w.Event('input', { bubbles: true })); await wait(200);
 if (!/Supra/i.test($('.sheet-layer.on')?.textContent || '')) fail('seed car GRX20 not found in add search');
 console.log('add search finds seed car: ok');
-click($('[data-act="add-manual"]')); await wait(150);
+// a car that is not in the database (e.g. Premium HNT17): explanation + manual route with the code filled in
+q.value = 'HNT17'; q.dispatchEvent(new w.Event('input', { bubbles: true })); await wait(200);
+if (!$('#add-res .nf')) fail('unknown code shows no "not in the database" card');
+click($('#add-res .nf [data-act="add-manual"]')); await wait(150);
+if (($('#f-toy')?.value || '') !== 'HNT17') fail('typed code was not carried into the card-code field');
+const fname = $('#f-name'); fname.value = 'supra'; fname.dispatchEvent(new w.Event('input', { bubbles: true })); await wait(150);
+if (!$('#f-sugg [data-act="f-usename"]')) fail('no known-model suggestion while typing the name');
+console.log('not-in-database flow (code kept, model suggestions): ok');
 if (!$('#f-ty')) fail('manual add form has no car type selector');
 console.log('manual add has type selector: ok');
+if (!$('.cpick .cp')) fail('colour picker has no named chips');
+if (!/Black|Negru/.test($('.cpick')?.textContent || '')) fail('colour chips have no names');
+if (!$('details.more')) fail('add form has no collapsible extra details');
+console.log('add form: named colours + folded details: ok');
 // shop check shows a rarity score without adding the car
 click($('#nav [data-v="chk"]')); await wait(150);
 const cq = $('#chk-q'); if (!cq) fail('check tab has no search input');
@@ -60,6 +71,9 @@ for (const k of ['a', 'b']) { const i = $('#cmp-q-' + k); if (!i) fail('compare 
 if ($('#cmp-table .cmprow') === null) fail('compare table has no rows');
 click($('[data-act="cmp-col-a"][data-v="red"]')); click($('[data-act="cmp-col-b"][data-v="blue"]')); await wait(100);
 if (!/different colour|culoare diferită/i.test($('#cmp-table')?.textContent || '')) fail('compare does not report different colours');
+if (!$('#cmp-res-a .vopt')) fail('compare has no readable version rows');
+if (!/\d{4}/.test($('#cmp-res-a .vopt')?.textContent || '')) fail('compare version rows show no year/series text');
+console.log('compare version list has text rows: ok');
 console.log('compare two cars: ok');
 click($('[data-act="cmp-close"]')); await wait(100);
 if (errors.length) fail('runtime errors');

@@ -67,6 +67,21 @@ for k,e,r in [('cmp.open','Compare 2 cars','Compară 2 mașini'),('cmp.title','C
  ('th.src','Summary of public collector guides. Details can differ by year, so always confirm online.','Rezumat după ghiduri publice pentru colecționari. Detaliile diferă de la an la an, deci confirmă mereu online.')]: a(k,e,r)
 for k,e,r in [('f.typeAuto','Automatic (from series)','Automat (după serie)'),('bk.remindNever','You have {n} cars saved only on this phone and no backup yet.','Ai {n} mașini salvate doar pe acest telefon și nicio copie de siguranță.'),('bk.remindOld','Your last backup was {d} days ago.','Ultima copie de siguranță a fost acum {d} zile.'),('bk.now','Back up now','Fă copie acum'),('bk.later','Later','Mai târziu'),('chk.recent','Recently checked','Verificate recent'),('chk.recentClear','Clear','Șterge'),('stats.dupList','Cars you own more than once','Mașini pe care le ai de mai multe ori')]: a(k,e,r)
 for k,e,r in [('wish.title','Wishlist','Dorințe'),('wish.add','Add to wishlist','Adaugă la dorințe'),('wish.added','Added to wishlist','Adăugat la dorințe'),('wish.in','In your wishlist','În dorințele tale'),('wish.remove','Remove from wishlist','Scoate din dorințe'),('col.refresh','Show other suggestions','Arată alte sugestii')]: a(k,e,r)
+for k,e,r in [
+('add.s1','Step 1 · Find the car','Pasul 1 · Caută mașina'),
+('add.s2','Step 2 · Pick the exact version','Pasul 2 · Alege versiunea exactă'),
+('add.s3','Last step · Colour and details','Ultimul pas · Culoare și detalii'),
+('add.nf.title','“{q}” is not in the database','„{q}” nu e în baza de date'),
+('add.nf.why','The database only holds the regular Hot Wheels lists from the wiki. Premium, Car Culture, multipacks and very new cars can be missing. You can still add it by hand, and the app remembers its code.','Baza de date are doar listele obișnuite Hot Wheels de pe wiki. Premium, Car Culture, multipack-urile și mașinile foarte noi pot lipsi. O poți adăuga oricum manual, iar aplicația îi ține minte codul.'),
+('add.nf.btnCode','Add it manually with code {c}','Adaug-o manual cu codul {c}'),
+('add.nf.btn','Add it manually','Adaug-o manual'),
+('add.cantFind','Cannot find it?','Nu o găsești?'),
+('add.cantFindText','Add it by hand: name, code and colour are enough.','Adaug-o manual: ajung numele, codul și culoarea.'),
+('add.codesHelp','Use the code on the card (like HNT17) or the one on the car base. One is enough; the app remembers it so you find the car next time.','Folosește codul de pe card (ex. HNT17) sau cel de pe baza mașinii. Ajunge unul; aplicația îl ține minte, ca să găsești mașina data viitoare.'),
+('add.sugg','Known model with this name. Tap it to link your car to it:','Model cunoscut cu acest nume. Apasă ca să legi mașina ta de el:'),
+('add.moreSum','More details (optional): series, year, country, type, place, note','Mai multe detalii (opțional): serie, an, țară, tip, loc, notă'),
+('cmp.pickVariantHelp','Each row is one version: year · series, colour hint, toy code. Tap one, or leave none selected to compare the model in general.','Fiecare rând e o versiune: an · serie, culoarea din wiki, codul jucăriei. Apasă una sau nu alege nimic ca să compari modelul în general.'),
+]: a(k,e,r)
 a('update.available','Update available','Actualizare disponibilă'); a('update.reload','Reload','Reîncarcă')
 en={k:e for k,e,_ in K}; ro={k:r for k,_,r in K}
 for n,d in (('en',en),('ro',ro)): json.dump(d,open(f'src/locales/{n}.json','w'),ensure_ascii=False,indent=1)

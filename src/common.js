@@ -21,7 +21,9 @@ export function pill(snap) {
   return `<span class="chip pill" style="background:${TIER_COLORS[r.tier]}">${r.score} · ${esc(t('tier.' + r.tier))}</span>`;
 }
 
-export function palettePicker(sel, act, label) {
+export function palettePicker(sel, act, label, named = false) {
+  // named: every colour is a chip with its name (no guessing what a bare circle means).
+  if (named) return `<div class="chips wrapc cpick" role="group" aria-label="${esc(label)}">${FAMILIES.map((f) => `<button type="button" class="pl cp ${sel === f ? 'on' : ''}" data-act="${act}" data-v="${f}" aria-pressed="${sel === f}">${dot(f)}<span>${esc(cname(f))}</span></button>`).join('')}</div>`;
   return `<div class="sw" role="group" aria-label="${esc(label)}">${FAMILIES.map((f) => `<button type="button" class="dot lg ${sel === f ? 'on' : ''}" style="background:${PALETTE[f]}" data-act="${act}" data-v="${f}" aria-label="${esc(cname(f))}" aria-pressed="${sel === f}"></button>`).join('')}</div>`;
 }
 
