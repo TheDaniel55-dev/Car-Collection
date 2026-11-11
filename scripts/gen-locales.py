@@ -88,6 +88,19 @@ for k,e,r in [
 ('mine.export','Export the list (CSV)','Exportă lista (CSV)'),
 ('mine.saved','List exported','Lista a fost exportată'),
 ]: a(k,e,r)
+for k,e,r in [
+('set.version','App version','Versiunea aplicației'),
+('ver.check','Check for updates','Verifică actualizări'),
+('ver.apply','Update now','Actualizează acum'),
+('ver.clean','Clean reload','Reîncărcare curată'),
+('ver.checking','Checking…','Verific…'),
+('ver.waiting','A new version is ready on this phone.','O versiune nouă e pregătită pe acest telefon.'),
+('ver.r.current','You have the latest version.','Ai ultima versiune.'),
+('ver.r.applying','Updating… the app will reload.','Actualizez… aplicația se va reîncărca.'),
+('ver.r.offline','No internet connection, cannot check now.','Nu e internet, nu pot verifica acum.'),
+('ver.r.unsupported','This browser manages updates by itself (no offline mode here).','Acest browser își gestionează singur actualizările (aici nu există mod offline).'),
+('ver.help','The number grows with every change. If the app stays on an old version, use “Clean reload”: it reloads the app files and keeps your cars and the database.','Numărul crește la fiecare modificare. Dacă aplicația rămâne pe o versiune veche, folosește „Reîncărcare curată”: reîncarcă fișierele aplicației și păstrează mașinile și baza de date.'),
+]: a(k,e,r)
 a('update.available','Update available','Actualizare disponibilă'); a('update.reload','Reload','Reîncarcă')
 en={k:e for k,e,_ in K}; ro={k:r for k,_,r in K}
 for n,d in (('en',en),('ro',ro)): json.dump(d,open(f'src/locales/{n}.json','w'),ensure_ascii=False,indent=1)

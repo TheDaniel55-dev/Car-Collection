@@ -381,6 +381,17 @@
  "mine.help": "These cars are not in the database (or not in that exact version). The list helps you see what is missing, and you can export it.",
  "mine.export": "Export the list (CSV)",
  "mine.saved": "List exported",
+ "set.version": "App version",
+ "ver.check": "Check for updates",
+ "ver.apply": "Update now",
+ "ver.clean": "Clean reload",
+ "ver.checking": "Checking…",
+ "ver.waiting": "A new version is ready on this phone.",
+ "ver.r.current": "You have the latest version.",
+ "ver.r.applying": "Updating… the app will reload.",
+ "ver.r.offline": "No internet connection, cannot check now.",
+ "ver.r.unsupported": "This browser manages updates by itself (no offline mode here).",
+ "ver.help": "The number grows with every change. If the app stays on an old version, use “Clean reload”: it reloads the app files and keeps your cars and the database.",
  "update.available": "Update available",
  "update.reload": "Reload"
 }

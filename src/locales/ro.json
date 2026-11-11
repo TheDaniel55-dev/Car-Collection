@@ -381,6 +381,17 @@
  "mine.help": "Aceste mașini nu sunt în baza de date (sau nu în versiunea exactă). Lista te ajută să vezi ce lipsește și o poți exporta.",
  "mine.export": "Exportă lista (CSV)",
  "mine.saved": "Lista a fost exportată",
+ "set.version": "Versiunea aplicației",
+ "ver.check": "Verifică actualizări",
+ "ver.apply": "Actualizează acum",
+ "ver.clean": "Reîncărcare curată",
+ "ver.checking": "Verific…",
+ "ver.waiting": "O versiune nouă e pregătită pe acest telefon.",
+ "ver.r.current": "Ai ultima versiune.",
+ "ver.r.applying": "Actualizez… aplicația se va reîncărca.",
+ "ver.r.offline": "Nu e internet, nu pot verifica acum.",
+ "ver.r.unsupported": "Acest browser își gestionează singur actualizările (aici nu există mod offline).",
+ "ver.help": "Numărul crește la fiecare modificare. Dacă aplicația rămâne pe o versiune veche, folosește „Reîncărcare curată”: reîncarcă fișierele aplicației și păstrează mașinile și baza de date.",
  "update.available": "Actualizare disponibilă",
  "update.reload": "Reîncarcă"
 }

@@ -340,6 +340,22 @@ export async function refreshStorage() {
 const seg = (id, items, cur, act) => `<div class="chips wrapc" role="group" aria-label="${esc(id)}">${items.map(([v, label]) => `<button type="button" class="pl ${cur === v ? 'on' : ''}" data-act="${act}" data-v="${v}" aria-pressed="${cur === v}">${esc(label)}</button>`).join('')}</div>`;
 const toggleRow = (id, label, help, on) => `<label class="toggle"><span><b>${esc(label)}</b><span class="mu">${esc(help)}</span></span><span class="swt"><input type="checkbox" data-ch="opt-toggle" data-k="${id}" ${on ? 'checked' : ''}><i></i></span></label>`;
 
+const APP_VER = typeof __APP_VERSION__ === 'undefined' ? 'dev' : __APP_VERSION__;
+const APP_SHA = typeof __APP_SHA__ === 'undefined' ? 'local' : __APP_SHA__;
+const APP_BUILT = typeof __APP_BUILT__ === 'undefined' ? '' : __APP_BUILT__;
+const verMsg = (k) => { const e = $('#ver-msg'); if (e) e.textContent = k ? t(k) : ''; };
+acts['app-update'] = async (el) => {
+  el.disabled = true; verMsg('ver.checking');
+  const r = await (hooks.checkUpdate?.() ?? 'unsupported');
+  el.disabled = false; verMsg('ver.r.' + r);
+};
+acts['app-clean'] = async (el) => {
+  if (!navigator.onLine) { verMsg('ver.r.offline'); return; }
+  el.disabled = true; verMsg('ver.checking');
+  const r = await (hooks.checkUpdate?.({ force: true }) ?? 'unsupported');
+  el.disabled = false; verMsg('ver.r.' + r);
+};
+
 export function settingsHTML() {
   const p = S.profile; const man = cat.manifest;
   const age = man ? Math.max(0, Math.floor((Date.now() - Date.parse(man.built)) / 864e5)) : null;
@@ -365,7 +381,12 @@ export function settingsHTML() {
   <div class="card"><h3>${esc(t('set.pin'))}</h3><p class="mu">${esc(t('pin.help'))}</p><div class="row wrap"><button type="button" class="btn s" data-act="pin-set">${esc(p.pin ? t('pin.change') : t('pin.set'))}</button>${p.pin ? `<button type="button" class="btn s" data-act="pin-off">${esc(t('pin.off'))}</button>` : ''}</div></div>
   <button type="button" class="btn s" data-act="open-about">${esc(t('about.title'))}</button>
   <div class="card"><h3>${esc(t('set.danger'))}</h3><button type="button" class="btn danger" data-act="wipe">${esc(t('wipe'))}</button></div>
-  <p class="mu center">${esc(t('app.name'))} v${esc(typeof __APP_VERSION__ === 'undefined' ? 'dev' : __APP_VERSION__)}</p>`;
+  <div class="card"><h3>${esc(t('set.version'))}</h3>
+    <p class="verline"><b>v${esc(APP_VER)}</b> <span class="mu">· ${esc(APP_SHA)}${APP_BUILT ? ' · ' + esc(fmtDate(APP_BUILT)) : ''}</span></p>
+    ${hooks.updateReady?.() ? `<p class="warn">${esc(t('ver.waiting'))}</p>` : ''}
+    <div class="row wrap"><button type="button" class="btn primary" data-act="app-update">${esc(hooks.updateReady?.() ? t('ver.apply') : t('ver.check'))}</button><button type="button" class="btn s" data-act="app-clean">${esc(t('ver.clean'))}</button></div>
+    <p id="ver-msg" class="mu" role="status"></p><p class="mu small">${esc(t('ver.help'))}</p></div>
+  <p class="mu center">${esc(t('app.name'))} v${esc(APP_VER)}</p>`;
 }
 
 chs['set-name'] = async (el) => { S.profile.name = el.value.trim(); await saveProfile(); };

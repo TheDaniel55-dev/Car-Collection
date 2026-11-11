@@ -52,6 +52,7 @@ self.addEventListener('fetch', (e) => {
   const req = e.request; const url = new URL(req.url);
   if (req.method !== 'GET' || url.origin !== location.origin) return;
   const rel = url.pathname.slice(new URL(self.registration.scope).pathname.length);
+  if (rel === 'version.json') return; // always the network, never a cached copy
   if (req.mode === 'navigate') { e.respondWith(caches.match(new URL('index.html', self.registration.scope).href).then((r) => r || fetch(req))); return; }
   if (rel === 'data/manifest.json') { e.respondWith(networkFirst(req, DATA)); return; }
   if (rel.startsWith('data/')) { e.respondWith(cacheFirst(req, DATA)); return; }

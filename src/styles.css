@@ -171,3 +171,4 @@ details.more[open]>summary{margin-bottom:10px}
 .chip.pick{background:var(--ac);color:var(--on)}
 .vopt>.g>b,.vopt .g>b{white-space:normal}
 .card.row.vopt>.g>b{white-space:normal;overflow:visible;text-overflow:clip}
+.verline{margin:0;font-size:1.15rem}

@@ -76,6 +76,12 @@ if (!/\d{4}/.test($('#cmp-res-a .vopt')?.textContent || '')) fail('compare versi
 console.log('compare version list has text rows: ok');
 console.log('compare two cars: ok');
 click($('[data-act="cmp-close"]')); await wait(100);
+click($('#nav [data-v="set"]')); await wait(150);
+if (!$('[data-act="app-update"]') || !$('[data-act="app-clean"]')) fail('settings has no version / update buttons');
+if (!/Versiunea aplicației|App version/.test($('#view')?.textContent || '')) fail('settings has no version card');
+click($('[data-act="app-update"]')); await wait(150);
+if (!($('#ver-msg')?.textContent || '').trim()) fail('update button gives no feedback');
+console.log('settings: version card + update buttons: ok');
 // hand-added car (code HNT17) shows up in Stats under "added by hand" and is found again by its code
 click($('#nav [data-v="col"]')); await wait(150);
 click($('#fab')); await wait(200);

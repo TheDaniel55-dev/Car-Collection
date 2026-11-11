@@ -95,20 +95,51 @@ async function installDatabase(first) {
   return r;
 }
 
+let swReg = null; let lastCheck = 0;
+const BUILD = typeof __APP_BUILD__ === 'undefined' ? 'dev' : __APP_BUILD__;
+
 function registerSW() {
   if (!('serviceWorker' in navigator) || location.hostname === 'localhost') return;
   navigator.serviceWorker.register('sw.js').then((reg) => {
-    const ask = (w) => toastAction(t('update.available'), t('update.reload'), () => w.postMessage('SKIP_WAITING'));
+    swReg = reg;
+    const ask = (w) => { toastAction(t('update.available'), t('update.reload'), () => w.postMessage('SKIP_WAITING')); if (S.tab === 'set') render(); };
     if (reg.waiting && navigator.serviceWorker.controller) ask(reg.waiting);
     reg.addEventListener('updatefound', () => {
       const w = reg.installing;
       w?.addEventListener('statechange', () => { if (w.state === 'installed' && navigator.serviceWorker.controller) ask(w); });
     });
     setInterval(() => reg.update().catch(() => {}), 6 * 3600 * 1000);
+    // An installed iPhone app is resumed, not reloaded: look for a new version every time it comes back to the front.
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'visible' || Date.now() - lastCheck < 5 * 60 * 1000) return;
+      lastCheck = Date.now(); reg.update().catch(() => {});
+    });
   }).catch(() => {});
   let reloaded = false;
   navigator.serviceWorker.addEventListener('controllerchange', () => { if (!reloaded) { reloaded = true; location.reload(); } });
 }
+
+/** Is a newer app version waiting on this device? */
+hooks.updateReady = () => !!(swReg && swReg.waiting && navigator.serviceWorker.controller);
+
+/** Throw away the cached app files (not your cars, not the database) and load everything fresh. */
+async function cleanReload() {
+  const regs = await navigator.serviceWorker.getRegistrations();
+  await Promise.all(regs.map((r) => r.unregister()));
+  for (const k of await caches.keys()) if (k.startsWith('cc-shell-') || k === 'cc-other') await caches.delete(k);
+  location.reload();
+}
+
+/** Settings button. Returns: 'current' | 'applying' | 'offline' | 'unsupported'. */
+hooks.checkUpdate = async ({ force = false } = {}) => {
+  if (!('serviceWorker' in navigator) || !swReg) return 'unsupported';
+  if (swReg.waiting) { swReg.waiting.postMessage('SKIP_WAITING'); return 'applying'; }
+  let live;
+  try { live = await (await fetch(`version.json?t=${Date.now()}`, { cache: 'no-store' })).json(); } catch { return 'offline'; }
+  if (live.build === BUILD && !force) { swReg.update().catch(() => {}); return 'current'; }
+  await cleanReload();
+  return 'applying';
+};
 
 async function boot() {
   try {

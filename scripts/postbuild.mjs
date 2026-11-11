@@ -21,7 +21,7 @@ fs.writeFileSync(`${DIST}/.nojekyll`, '');
 
 const version = fs.readFileSync(`${DIST}/index.html`, 'utf8').length + '-' + man.version + '-' + Date.now().toString(36);
 const all = walk(DIST);
-const shell = ['./', ...all.filter((f) => !f.endsWith('.woff') && !f.startsWith('data/') && !f.startsWith('ocr/') && f !== 'sw.js' && f !== '.nojekyll')];
+const shell = ['./', ...all.filter((f) => !f.endsWith('.woff') && !f.startsWith('data/') && !f.startsWith('ocr/') && f !== 'sw.js' && f !== '.nojekyll' && f !== 'version.json')];
 const data = ['data/manifest.json', ...man.shards.map((s) => `data/${s.file}?h=${s.hash}`)];
 const tpl = fs.readFileSync('scripts/sw.template.js', 'utf8')
   .replace(/__VERSION__/g, version).replace('__SHELL__', JSON.stringify(shell)).replace('__DATA__', JSON.stringify(data)).replace('__OCR__', JSON.stringify(all.filter((f) => f.startsWith('ocr/'))));
