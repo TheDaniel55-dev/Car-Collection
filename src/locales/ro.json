@@ -377,6 +377,10 @@
  "add.sugg": "Model cunoscut cu acest nume. Apasă ca să legi mașina ta de el:",
  "add.moreSum": "Mai multe detalii (opțional): serie, an, țară, tip, loc, notă",
  "cmp.pickVariantHelp": "Fiecare rând e o versiune: an · serie, culoarea din wiki, codul jucăriei. Apasă una sau nu alege nimic ca să compari modelul în general.",
+ "mine.title": "Adăugate de mine manual ({n})",
+ "mine.help": "Aceste mașini nu sunt în baza de date (sau nu în versiunea exactă). Lista te ajută să vezi ce lipsește și o poți exporta.",
+ "mine.export": "Exportă lista (CSV)",
+ "mine.saved": "Lista a fost exportată",
  "update.available": "Actualizare disponibilă",
  "update.reload": "Reîncarcă"
 }

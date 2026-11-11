@@ -82,6 +82,12 @@ for k,e,r in [
 ('add.moreSum','More details (optional): series, year, country, type, place, note','Mai multe detalii (opțional): serie, an, țară, tip, loc, notă'),
 ('cmp.pickVariantHelp','Each row is one version: year · series, colour hint, toy code. Tap one, or leave none selected to compare the model in general.','Fiecare rând e o versiune: an · serie, culoarea din wiki, codul jucăriei. Apasă una sau nu alege nimic ca să compari modelul în general.'),
 ]: a(k,e,r)
+for k,e,r in [
+('mine.title','Added by hand ({n})','Adăugate de mine manual ({n})'),
+('mine.help','These cars are not in the database (or not in that exact version). The list helps you see what is missing, and you can export it.','Aceste mașini nu sunt în baza de date (sau nu în versiunea exactă). Lista te ajută să vezi ce lipsește și o poți exporta.'),
+('mine.export','Export the list (CSV)','Exportă lista (CSV)'),
+('mine.saved','List exported','Lista a fost exportată'),
+]: a(k,e,r)
 a('update.available','Update available','Actualizare disponibilă'); a('update.reload','Reload','Reîncarcă')
 en={k:e for k,e,_ in K}; ro={k:r for k,_,r in K}
 for n,d in (('en',en),('ro',ro)): json.dump(d,open(f'src/locales/{n}.json','w'),ensure_ascii=False,indent=1)

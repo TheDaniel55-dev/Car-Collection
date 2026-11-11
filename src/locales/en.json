@@ -377,6 +377,10 @@
  "add.sugg": "Known model with this name. Tap it to link your car to it:",
  "add.moreSum": "More details (optional): series, year, country, type, place, note",
  "cmp.pickVariantHelp": "Each row is one version: year · series, colour hint, toy code. Tap one, or leave none selected to compare the model in general.",
+ "mine.title": "Added by hand ({n})",
+ "mine.help": "These cars are not in the database (or not in that exact version). The list helps you see what is missing, and you can export it.",
+ "mine.export": "Export the list (CSV)",
+ "mine.saved": "List exported",
  "update.available": "Update available",
  "update.reload": "Reload"
 }

@@ -45,10 +45,29 @@ async function findPages() {
   return [...pages.entries()].sort((a, b) => a[0] - b[0]);
 }
 
+/** Report only: other list-like pages on the wiki (Premium, Car Culture, ...) that the yearly mainline lists do not cover. Nothing is parsed or published from these. */
+async function discoverOtherLists() {
+  const prefixes = ['Car Culture', 'Hot Wheels Premium', 'Premium', 'Boulevard', 'Silver Series', 'Collectors', 'Hot Wheels Collectors', 'Team Transport', 'Pop Culture', 'Hammer Drop', 'Red Line Club', 'RLC', 'List of Hot Wheels', 'List of Car Culture', 'List of Premium'];
+  console.log('== Other list pages on the wiki (for coverage planning) ==');
+  for (const p of prefixes) {
+    try {
+      const j = await api({ action: 'query', list: 'allpages', apprefix: p, aplimit: '60' });
+      const titles = (j.query?.allpages || []).map((x) => x.title).filter((x) => !/^List of (\d{4}) Hot Wheels$/i.test(x));
+      if (titles.length) console.log(`  ${p}* (${titles.length}${j.continue ? '+' : ''}): ${titles.slice(0, 40).join(' | ')}`);
+    } catch (e) { console.log(`  ${p}*: lookup failed (${e.message})`); }
+    await sleep(1000);
+  }
+  try {
+    const j = await api({ action: 'query', list: 'search', srsearch: 'Hammer Drop Bugatti Veyron HRW06', srlimit: '5' });
+    console.log('  search "Hammer Drop Bugatti Veyron HRW06": ' + ((j.query?.search || []).map((x) => x.title).join(' | ') || 'no hits'));
+  } catch { /* report only */ }
+}
+
 async function main() {
   console.log(`Output: ${OUT}`);
   const prev = readRows(OUT);
   const pages = await findPages();
+  try { await discoverOtherLists(); } catch (e) { console.log('discovery skipped:', e.message); }
   if (!pages.length) throw new Error('No "List of YYYY Hot Wheels" pages found - wiki layout changed?');
   console.log(`Found ${pages.length} yearly pages`);
   const bar = progress('Downloading years', pages.length);

@@ -76,6 +76,20 @@ if (!/\d{4}/.test($('#cmp-res-a .vopt')?.textContent || '')) fail('compare versi
 console.log('compare version list has text rows: ok');
 console.log('compare two cars: ok');
 click($('[data-act="cmp-close"]')); await wait(100);
+// hand-added car (code HNT17) shows up in Stats under "added by hand" and is found again by its code
+click($('#nav [data-v="col"]')); await wait(150);
+click($('#fab')); await wait(200);
+{ const aq = $('#add-q'); aq.value = 'HNT17'; aq.dispatchEvent(new w.Event('input', { bubbles: true })); await wait(200); }
+click($('#add-res .nf [data-act="add-manual"]')); await wait(150);
+{ const fn = $('#f-name'); fn.value = 'Bugatti Veyron'; fn.dispatchEvent(new w.Event('input', { bubbles: true })); await wait(100); }
+click($('[data-act="f-col"][data-v="black"]')); click($('[data-act="f-save"]')); await wait(400);
+click($('#nav [data-v="sta"]')); await wait(200);
+if (!/Added by hand|Adăugate de mine/i.test($('#view')?.textContent || '')) fail('Stats has no "added by hand" list');
+if (!$('[data-act="mine-export"]')) fail('no export button for hand-added cars');
+click($('#nav [data-v="chk"]')); await wait(150);
+{ const c2 = $('#chk-q'); c2.value = 'HNT17'; c2.dispatchEvent(new w.Event('input', { bubbles: true })); await wait(250); }
+if (!/Veyron/i.test($('#chk-res')?.textContent || '')) fail('check tab does not find the hand-added car by its card code');
+console.log('hand-added car: listed in Stats + found by code in the shop check: ok');
 if (errors.length) fail('runtime errors');
 fs.rmSync(dir, { recursive: true, force: true });
 console.log('SMOKE OK (jsdom; not a real browser)'); process.exit(0);

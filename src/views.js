@@ -292,6 +292,23 @@ const bars = (map, color) => {
 };
 const tally = (f) => { const m = new Map(); for (const o of own.list) { const k = f(o); if (k) m.set(k, (m.get(k) || 0) + o.qty); } return m; };
 
+/** Cars added by hand: they are not (exactly) in the catalogue, so this is the "what is missing from the database" list. */
+const manualCars = () => own.list.filter((o) => !o.vid);
+function mineHTML() {
+  const m = manualCars(); if (!m.length) return '';
+  return `<div class="card"><h3>${esc(t('mine.title', { n: m.length }))}</h3><p class="mu">${esc(t('mine.help'))}</p>
+  ${m.slice(0, 30).map((o) => `<button type="button" class="row linkrow pad" data-act="open-car" data-id="${o.id}">${dot(o.snap.cf)}<span class="g">${esc(o.snap.name)} <span class="mu">${esc([o.snap.toy || o.snap.base, o.snap.col || cname(o.snap.cf)].filter(Boolean).join(' · '))}</span></span></button>`).join('')}
+  ${m.length > 30 ? `<p class="mu">${esc(t('add.more', { n: m.length - 30 }))}</p>` : ''}
+  <button type="button" class="btn s" data-act="mine-export">${esc(t('mine.export'))}</button></div>`;
+}
+acts['mine-export'] = async () => {
+  const q = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const rows = manualCars().map((o) => [o.snap.name, o.snap.toy, o.snap.base, o.snap.col || cname(o.snap.cf), o.snap.ser, o.snap.y || '', o.snap.ty || ''].map(q).join(','));
+  const csv = '\ufeff' + [['name', 'card_code', 'base_code', 'colour', 'series', 'year', 'type'].join(','), ...rows].join('\n');
+  const r = await saveFile('cars-missing-from-database.csv', csv, 'text/csv');
+  if (r !== 'cancelled') toast(t('mine.saved'));
+};
+
 export function statsHTML() {
   const list = own.list; const cars = list.reduce((a, o) => a + o.qty, 0);
   const rs = list.map((o) => ({ o, r: rarityBreakdown(o.snap) }));
@@ -305,6 +322,7 @@ export function statsHTML() {
   return `${hdr(t('stats.title'))}
   <div class="stats">${[[t('stats.cars'), cars], [t('stats.models'), own.byKey.size], third].map(([l, n]) => `<div class="stat"><b>${n}</b><span>${esc(l)}</span></div>`).join('')}</div>
   ${dupes ? `<p class="warn">⚠ ${esc(t('stats.dupes', { n: dupes }))}</p><div class="card"><h3>${esc(t('stats.dupList'))}</h3>${list.filter((o) => o.qty > 1).sort((a, b) => b.qty - a.qty).slice(0, 30).map((o) => `<button type="button" class="row linkrow pad" data-act="open-car" data-id="${o.id}">${dot(o.snap.cf)}<span class="g">${esc(o.snap.name)} <span class="mu">${esc(o.snap.col || cname(o.snap.cf))}</span></span><b>×${o.qty}</b></button>`).join('')}</div>` : ''}
+  ${mineHTML()}
   <div class="card row"><div class="g"><div class="mu">${esc(t('stats.rarity'))} <span class="chip">${esc(t('rarity.estimate'))}</span></div><div class="bignum">${avg}</div></div><button type="button" class="pl" data-act="rarity-how" aria-label="${esc(t('rarity.how'))}">?</button></div>
   <div class="card"><h3>${esc(t('stats.rarest'))}</h3>${top.map(({ o, r }) => `<button type="button" class="row linkrow pad" data-act="open-car" data-id="${o.id}">${dot(o.snap.cf)}<span class="g">${esc(o.snap.name)}</span>${pill(o.snap)}</button>`).join('') || `<p class="mu">${esc(t('stats.nodata'))}</p>`}</div>
   <div class="card"><h3>${esc(t('stats.byTier'))}</h3>${bars(tiers)}</div>
