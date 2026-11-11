@@ -115,5 +115,12 @@ await ok('migration folds saved cars and wishlist entries, and is a no-op the se
   assert.equal(S.verdict(keep.snap.key, { cf: 'red' }).level, 'amber');
 });
 
+await ok('card text -> code and likely name (manual add after a scan)', () => {
+  const g = S.ocrGuess('MATTEL  HOT WHEELS\nHNT17\nBUGATTI VEYRON\nREAL RIDERS\nHAMMER DROP\nMADE IN MALAYSIA U48N');
+  assert.equal(g.code, 'HNT17'); assert.equal(g.names[0], 'Bugatti Veyron');
+  const g2 = S.ocrGuess('HYWB4 FERRARI SF9O STRADALE\n1:64 SCALE DIECAST');
+  assert.ok(g2.names[0] && /Ferrari/.test(g2.names[0]), JSON.stringify(g2));
+  assert.equal(S.ocrGuess('').code, '');
+});
 await server.close();
 console.log(process.exitCode ? 'FAILED' : `all ${n} logic tests passed`);

@@ -81,6 +81,9 @@ if (!$('[data-act="app-update"]') || !$('[data-act="app-clean"]')) fail('setting
 if (!/Versiunea aplicației|App version/.test($('#view')?.textContent || '')) fail('settings has no version card');
 click($('[data-act="app-update"]')); await wait(150);
 if (!($('#ver-msg')?.textContent || '').trim()) fail('update button gives no feedback');
+click($('[data-act="news-open"]')); await wait(150);
+{ const layers = [...w.document.querySelectorAll('.sheet-layer.on')]; if (!layers.some((l) => /Ce e nou|What's new/.test(l.textContent))) fail("What's new did not open");
+  const closeBtns = w.document.querySelectorAll('.sheet-layer.on [data-act="sheet-close"]'); click(closeBtns[closeBtns.length - 1]); await wait(200); }
 console.log('settings: version card + update buttons: ok');
 // hand-added car (code HNT17) shows up in Stats under "added by hand" and is found again by its code
 click($('#nav [data-v="col"]')); await wait(150);

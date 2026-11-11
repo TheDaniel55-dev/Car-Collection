@@ -14,6 +14,7 @@ import { t, setLang } from './i18n.js';
 import { initStore, S, isDark } from './store.js';
 import { loadCatalogue, syncCatalogue, cat } from './catalogue.js';
 import { acts, ins, chs, hooks } from './registry.js';
+import { maybeShowNews, markNewsSeen } from './news.js';
 import { toastAction, toast, $, $$, closeSheet, sheetOpen } from './ui.js';
 import { VIEWS, refreshStorage } from './views.js';
 import { openOnboarding } from './sheets.js';
@@ -154,7 +155,7 @@ async function boot() {
     const first = cat.list.length === 0;
     registerSW();
     installDatabase(first).catch(() => { $('#boot').hidden = true; });
-    if (!S.profile.onboarded && !S.locked) setTimeout(openOnboarding, 500);
+    if (!S.profile.onboarded && !S.locked) { markNewsSeen(); setTimeout(openOnboarding, 500); } else if (!S.locked) setTimeout(maybeShowNews, 900);
   } catch (e) {
     $('#view').innerHTML = `<div class="card"><h2>${t('err.storage')}</h2><p class="mu">${String(e?.message || e)}</p></div>`;
   }

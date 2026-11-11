@@ -96,6 +96,28 @@ export function parseOcrText(text) {
   return { codes: [...codes], words };
 }
 
+const NOISE = new Set('MATTEL HOT WHEELS PREMIUM CAR CULTURE MALAYSIA CHINA THAILAND INDONESIA VIETNAM SCALE DIECAST DIE CAST METAL REAL RIDERS HAMMER DROP TM INC EL SEGUNDO CA USA MADE IN ALL RIGHTS RESERVED AGES YEARS WARNING CHOKING HAZARD SMALL PARTS COLLECTOR COLLECTORS SERIES NEW MODEL THE AND FOR WITH OF'.split(' '));
+const titleWord = (w) => (w.length <= 3 && !/[AEIOUY]/.test(w) ? w : w[0] + w.slice(1).toLowerCase());
+
+/** Best guess of code and model name from card/base text. Heuristic: OCR on a blister is noisy, so the result is only a starting point. */
+export function ocrGuess(text) {
+  const { codes } = parseOcrText(text);
+  const code = codes.find((c) => /^[A-Z]{3}\d{2}$/.test(c)) || codes.find((c) => /^[A-Z]{2,4}\d{1,3}[A-Z]?$/.test(c)) || '';
+  const seen = new Set(); const cand = [];
+  for (const line of String(text || '').split(/\r?\n/)) {
+    const toks = line.toUpperCase().replace(/[^A-Z0-9'\- ]/g, ' ').split(/\s+/).filter(Boolean);
+    const codeLike = (w) => w === code || /^\d{4,}$/.test(w) || (/\d/.test(w) && /[A-Z]/.test(w) && w.length >= 4);
+    const words = toks.filter((w) => !codeLike(w));
+    const keep = words.filter((w) => !NOISE.has(w));
+    const letters = keep.join('').replace(/[^A-Z]/g, '').length;
+    if (keep.length < 1 || keep.length > 6 || letters < 5 || keep.length < words.length * 0.6) continue;
+    const name = keep.map(titleWord).join(' ');
+    if (seen.has(name)) continue; seen.add(name); cand.push({ name, letters, words: keep.length });
+  }
+  cand.sort((a, b) => (b.words >= 2 && b.words <= 4) - (a.words >= 2 && a.words <= 4) || b.letters - a.letters);
+  return { code, codes, names: cand.slice(0, 3).map((x) => x.name) };
+}
+
 export function matchOcr(text, limit = 6) {
   const { codes, words } = parseOcrText(text);
   const out = new Map();

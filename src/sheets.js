@@ -5,7 +5,7 @@ import { PALETTE, FAMILIES, colorFamily } from '../shared/colors.js';
 import { classifyType } from '../shared/classify.js';
 import { t, tl, setLang, fmtDate } from './i18n.js';
 import { cat, syncCatalogue } from './catalogue.js';
-import { own, searchCastings, matchOcr, castingByKey, variantsOf, ownedOf, verdict } from './search.js';
+import { own, searchCastings, matchOcr, ocrGuess, castingByKey, variantsOf, ownedOf, verdict } from './search.js';
 import { S, opt, addOwned, saveOwned, removeOwned, makeSnap, saveProfile, switchProfile, createProfile, deleteProfile } from './store.js';
 import { progress } from './series.js';
 import { rarityBreakdown, BASE_POINTS, TIER_COLORS, TIERS } from './rarity.js';
@@ -76,10 +76,13 @@ chs['add-ocr'] = async (el) => {
     const r = await readPhoto(f, 'high');
     const text = await recognize(r.canvas, (m) => { if (m.status === 'recognizing text') toast(t('ocr.reading', { p: Math.round((m.progress || 0) * 100) }), 8000); });
     toast(t('ocr.done'));
-    A.ocr = text;
+    A.ocr = text; A.guess = ocrGuess(text);
     const hits = matchOcr(text);
     const box = $('#add-res');
-    if (!hits.length) { box.innerHTML = `<p class="mu">${esc(t('ocr.nomatch'))}</p><pre class="ocr">${esc(text.trim().slice(0, 300))}</pre>`; return; }
+    if (!hits.length) {
+      const g = A.guess; const got = [g.code && `${t('f.toy')}: ${g.code}`, g.names[0] && `${t('f.name')}: ${g.names[0]}`].filter(Boolean).join(' · ');
+      box.innerHTML = `<p class="mu">${esc(t('ocr.nomatch'))}</p>${got ? `<div class="card nf"><b>${esc(t('add.ocrGot'))}</b><p class="mu">${esc(got)}</p><button type="button" class="btn primary" data-act="add-manual">${esc(t('add.ocrBtn'))}</button></div>` : ''}<pre class="ocr">${esc(text.trim().slice(0, 300))}</pre>`; return;
+    }
     box.innerHTML = `<p class="mu">${esc(t('ocr.found'))}</p>` + hits.map((c) => `<button type="button" class="card row it" data-act="add-pick" data-key="${esc(c.key)}"><span class="g"><b>${esc(c.name)}</b><span class="mu">${esc([c.brand, years(c)].filter(Boolean).join(' · '))}</span></span><span class="chip">${c.score >= 100 ? '✓' : '~'}</span></button>`).join('');
   } catch { toast(t('ocr.unavailable'), 4000); }
 };
@@ -117,7 +120,16 @@ function variantsHTML() {
 acts['add-back'] = () => { A.step = 'search'; setSheet(searchHTML()); };
 acts['add-vcf'] = (el) => { A.cf = A.cf === el.dataset.v ? '' : el.dataset.v; setSheet(variantsHTML()); };
 acts['add-notlisted'] = () => startForm({ name: A.casting.name, base: [...A.casting.bases][0] || '', cf: A.cf }, { manual: true });
-acts['add-manual'] = () => startForm({ name: A.q && !/\d/.test(A.q) ? A.q.trim() : '', toy: codeLike(A.q), cf: A.cf }, { manual: true });
+acts['add-manual'] = () => {
+  // Typed text wins; otherwise use what was read from the scanned card (code + most likely name). Both stay editable.
+  const g = A.ocr ? (A.guess || ocrGuess(A.ocr)) : null;
+  const typed = A.q && !/\d/.test(A.q) ? A.q.trim() : '';
+  startForm({ name: typed || g?.names?.[0] || '', toy: codeLike(A.q) || g?.code || '', cf: A.cf }, { manual: true });
+  A.names = typed ? [] : (g?.names || []);
+  if (A.names.length) { const box = $('#f-ocr'); if (box) box.innerHTML = ocrChips(); }
+};
+const ocrChips = () => `<p class="mu small">${esc(t('add.ocrRead'))}</p><div class="chips wrapc">${A.names.map((n) => `<button type="button" class="pl" data-act="f-usetext" data-name="${esc(n)}">${esc(n)}</button>`).join('')}</div>`;
+acts['f-usetext'] = (el) => { const f = $('#f-name'); if (f) { f.value = el.dataset.name; refreshDup(); } };
 acts['add-variant'] = (el) => {
   const v = cat.byId.get(el.dataset.id); if (!v) return;
   // The colour is picked by the user (the catalogue colour is only shown as a hint).
@@ -139,7 +151,7 @@ function formHTML() {
   // 1) which car
   const car = locked
     ? `<div class="card row"><div class="g"><b>${esc(d.name)}</b><div class="mu">${esc(picked)}</div></div>${d.toy ? `<span class="chip mono">${esc(d.toy)}</span>` : ''}</div>`
-    : `${field('f-name', t('f.name'), d.name, 'data-in="f-dup" autocomplete="off" placeholder="Bugatti Veyron"')}<div id="f-sugg"></div>
+    : `${field('f-name', t('f.name'), d.name, 'data-in="f-dup" autocomplete="off" placeholder="Bugatti Veyron"')}<div id="f-ocr"></div><div id="f-sugg"></div>
        <div class="grid2">${field('f-toy', t('f.toy'), d.toy, 'class="mono" autocapitalize="characters" data-in="f-basefill" placeholder="HNT17"')}${field('f-base', t('f.base'), d.base, 'class="mono" autocapitalize="characters" data-in="f-basefill"')}</div>
        <p class="mu small">${esc(t('add.codesHelp'))}</p>`;
   // 2) colour: named chips, never bare circles

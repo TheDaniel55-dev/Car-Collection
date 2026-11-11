@@ -393,6 +393,11 @@
  "ver.r.unsupported": "Acest browser își gestionează singur actualizările (aici nu există mod offline).",
  "ver.help": "Numărul crește la fiecare modificare. Dacă aplicația rămâne pe o versiune veche, folosește „Reîncărcare curată”: reîncarcă fișierele aplicației și păstrează mașinile și baza de date.",
  "f.alt": "Versiune de vopsire",
+ "add.ocrGot": "Citit de pe card",
+ "add.ocrBtn": "Adaug-o manual cu aceste date",
+ "add.ocrRead": "Citit de pe card (poate fi greșit, verifică):",
+ "news.title": "Ce e nou",
+ "news.ok": "Am înțeles",
  "update.available": "Actualizare disponibilă",
  "update.reload": "Reîncarcă"
 }

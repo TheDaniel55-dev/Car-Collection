@@ -384,7 +384,7 @@ export function settingsHTML() {
   <div class="card"><h3>${esc(t('set.version'))}</h3>
     <p class="verline"><b>v${esc(APP_VER)}</b> <span class="mu">· ${esc(APP_SHA)}${APP_BUILT ? ' · ' + esc(fmtDate(APP_BUILT)) : ''}</span></p>
     ${hooks.updateReady?.() ? `<p class="warn">${esc(t('ver.waiting'))}</p>` : ''}
-    <div class="row wrap"><button type="button" class="btn primary" data-act="app-update">${esc(hooks.updateReady?.() ? t('ver.apply') : t('ver.check'))}</button><button type="button" class="btn s" data-act="app-clean">${esc(t('ver.clean'))}</button></div>
+    <div class="row wrap"><button type="button" class="btn primary" data-act="app-update">${esc(hooks.updateReady?.() ? t('ver.apply') : t('ver.check'))}</button><button type="button" class="btn s" data-act="app-clean">${esc(t('ver.clean'))}</button><button type="button" class="btn s" data-act="news-open">${esc(t('news.title'))}</button></div>
     <p id="ver-msg" class="mu" role="status"></p><p class="mu small">${esc(t('ver.help'))}</p></div>
   <p class="mu center">${esc(t('app.name'))} v${esc(APP_VER)}</p>`;
 }

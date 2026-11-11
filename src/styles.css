@@ -172,3 +172,4 @@ details.more[open]>summary{margin-bottom:10px}
 .vopt>.g>b,.vopt .g>b{white-space:normal}
 .card.row.vopt>.g>b{white-space:normal;overflow:visible;text-overflow:clip}
 .verline{margin:0;font-size:1.15rem}
+.news{margin:0;padding-left:1.1rem;display:flex;flex-direction:column;gap:6px}

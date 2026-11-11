@@ -393,6 +393,11 @@
  "ver.r.unsupported": "This browser manages updates by itself (no offline mode here).",
  "ver.help": "The number grows with every change. If the app stays on an old version, use “Clean reload”: it reloads the app files and keeps your cars and the database.",
  "f.alt": "Paint run",
+ "add.ocrGot": "Read from the card",
+ "add.ocrBtn": "Add it manually with these details",
+ "add.ocrRead": "Read from the card (may be wrong, check it):",
+ "news.title": "What's new",
+ "news.ok": "Got it",
  "update.available": "Update available",
  "update.reload": "Reload"
 }
