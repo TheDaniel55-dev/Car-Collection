@@ -22,7 +22,7 @@ const years = (c) => (c.y1 ? (c.y0 === c.y1 ? `${c.y0}` : `${c.y0}–${c.y1}`) :
 
 /* =============================== ADD FLOW =============================== */
 export function openAdd(pre = {}) {
-  A = { step: 'search', q: pre.q || '', key: pre.key || null, cf: pre.cf || '', ser: pre.ser || '', photo: '', draft: null, edit: null, ocr: '' };
+  A = { sep: false, step: 'search', q: pre.q || '', key: pre.key || null, cf: pre.cf || '', ser: pre.ser || '', photo: '', draft: null, edit: null, ocr: '' };
   openSheet(searchHTML(), { onClose: () => { A = null; } });
   if (pre.key) pickCasting(pre.key);
 }
@@ -96,7 +96,7 @@ function variantsHTML() {
   const shown = vs.slice(0, 80);
   const rows = shown.map((v) => {
     const n = (own.byVid.get(v.id) || []).reduce((a, o) => a + o.qty, 0);
-    return `<button type="button" class="card row it ${A.cf && v.cf === A.cf ? 'hl' : ''}" data-act="add-variant" data-id="${esc(v.id)}">${dot(v.cf, 'lg')}<span class="g"><b>${esc(v.col || t('unknown'))}</b><span class="mu">${esc([v.ser, v.y || '', typeLabel(v.ty)].filter(Boolean).join(' · '))}</span></span>${v.toy ? `<span class="chip mono">${esc(v.toy)}</span>` : ''}${n ? `<span class="chip ok">✓ ×${n}</span>` : ''}</button>`;
+    return `<button type="button" class="card row it ${A.cf && v.cf === A.cf ? 'hl' : ''}" data-act="add-variant" data-id="${esc(v.id)}">${dot(v.cf, 'lg')}<span class="g"><b>${esc(v.col || t('add.colourUnknown'))}</b><span class="mu">${esc([v.ser, v.y || '', typeLabel(v.ty)].filter(Boolean).join(' · '))}</span></span>${v.toy ? `<span class="chip mono">${esc(v.toy)}</span>` : ''}${n ? `<span class="chip ok">✓ ×${n}</span>` : ''}</button>`;
   }).join('');
   return `<button type="button" class="link" data-act="add-back">‹ ${esc(t('back'))}</button>
   <h2>${esc(c.name)}</h2><p class="mu">${esc(t('add.pickVariant', { n: vs.length }))}</p>
@@ -110,7 +110,8 @@ acts['add-notlisted'] = () => startForm({ name: A.casting.name, base: [...A.cast
 acts['add-manual'] = () => startForm({ name: A.q && !/\d/.test(A.q) ? A.q : '', base: /\d/.test(A.q) && !/\s/.test(A.q) ? A.q.toUpperCase() : '', cf: A.cf }, { manual: true });
 acts['add-variant'] = (el) => {
   const v = cat.byId.get(el.dataset.id); if (!v) return;
-  startForm({ name: v.name, col: v.col, cf: v.cf, ser: v.ser, y: v.y, cy: v.cy, toy: v.toy, base: v.base, num: v.num, ty: v.ty, tp: v.tp, wh: v.wh }, { vid: v.id });
+  // The colour is picked by the user (the catalogue colour is only shown as a hint).
+  startForm({ name: v.name, col: '', cf: A.cf || '', wikiCol: v.col || '', ser: v.ser, y: v.y, cy: v.cy, toy: v.toy, base: v.base, num: v.num, ty: v.ty, tp: v.tp, wh: v.wh }, { vid: v.id });
 };
 
 /* ---------- details / manual form ---------- */
@@ -126,7 +127,10 @@ function formHTML() {
   const v = A.vid ? cat.byId.get(A.vid) : null;
   const locked = !!A.vid && !rec;
   const head = locked
-    ? `<div class="card row">${dot(d.cf, 'lg')}<div class="g"><b>${esc(d.name)}</b><div class="mu">${esc([d.col, d.ser, d.y || ''].filter(Boolean).join(' · '))}</div></div>${d.toy ? `<span class="chip mono">${esc(d.toy)}</span>` : ''}</div>`
+    ? `<div class="card row"><div class="g"><b>${esc(d.name)}</b><div class="mu">${esc([d.ser, d.y || ''].filter(Boolean).join(' · '))}</div></div>${d.toy ? `<span class="chip mono">${esc(d.toy)}</span>` : ''}</div>
+       <div class="fieldlab">${esc(t('f.colour'))}</div><p class="mu">${esc(t('add.pickColour'))}</p>${palettePicker(d.cf, 'f-col', t('f.colour'))}
+       ${d.wikiCol ? `<p class="mu">${esc(t('add.wikiColour', { c: d.wikiCol }))}</p>` : ''}
+       ${field('f-colname', t('f.colourName'), d.col, '')}`
     : `${field('f-name', t('f.name'), d.name, 'data-in="f-dup" autocomplete="off"')}
        <div class="grid2">${field('f-base', t('f.base'), d.base, 'class="mono" autocapitalize="characters" data-in="f-basefill"')}${field('f-toy', t('f.toy'), d.toy, 'class="mono" autocapitalize="characters"')}</div>
        <div class="fieldlab">${esc(t('f.colour'))}</div>${palettePicker(d.cf, 'f-col', t('f.colour'))}
@@ -152,7 +156,10 @@ function readForm() {
     d.name = g('f-name') || d.name; d.base = g('f-base'); d.toy = g('f-toy'); d.col = g('f-colname'); d.ser = g('f-ser');
     d.y = Number(g('f-y')) || 0; d.cy = Number(g('f-cy')) || 0; d.made = g('f-made');
     if (!d.cf && d.col) d.cf = colorFamily(d.col);
-  } else if (!d.base) d.base = g('f-base');
+  } else {
+    if (!d.base) d.base = g('f-base');
+    d.col = g('f-colname'); if (!d.cf && d.col) d.cf = colorFamily(d.col);
+  }
   return { prod: g('f-prod'), qty: Math.max(1, Number(g('f-qty')) || 1), st: $('#f-st')?.value || 'loose', loc: g('f-loc'), note: g('f-note') };
 }
 
@@ -163,9 +170,11 @@ function refreshDup() {
   const ser = $('#f-ser')?.value ?? d.ser;
   const v = verdict(castKey(name), { cf: d.cf, ser, vid: A.vid, mode: opt('dup'), prod: $('#f-prod')?.value });
   if (v.level === 'green') { box.innerHTML = ''; return; }
-  box.innerHTML = `<div class="verdict ${v.level === 'red' ? 'has' : 'other'}"><strong>${esc(t('v.' + v.level + '.' + v.reason))}</strong>${v.cols.length ? `<div class="mini">${v.cols.map((c) => `${dot(c)} ${esc(cname(c))}`).join(' ')}</div>` : ''}</div>`;
+  box.innerHTML = `<div class="verdict ${v.level === 'red' ? 'has' : 'other'}"><strong>${esc(t('v.' + v.level + '.' + v.reason))}</strong>${v.cols.length ? `<div class="mini">${v.cols.map((c) => `${dot(c)} ${esc(cname(c))}`).join(' ')}</div>` : ''}
+  ${v.level === 'red' ? `<label class="field chk"><input type="checkbox" data-ch="f-sep" ${A.sep ? 'checked' : ''}> <span>${esc(t('add.separate'))}</span></label>` : ''}</div>`;
 }
 ins['f-dup'] = refreshDup;
+chs['f-sep'] = (el) => { if (A) A.sep = el.checked; };
 ins['f-basefill'] = (el) => {
   const code = codeKey(el.value); if (code.length < 5) return;
   const key = [...(searchCastings(code, 1))].find((c) => c.score >= 100)?.key;
@@ -196,7 +205,7 @@ acts['f-save'] = async () => {
     if (A.photo) rec.photo = A.photo;
     await saveOwned(rec); closeSheet(); hooks.refresh(); toast(t('saved')); return;
   }
-  const { merged } = await addOwned({ vid: A.vid, snap, qty: x.qty, prod: x.prod, loc: x.loc, st: x.st, note: x.note, photo: A.photo });
+  const { merged } = await addOwned({ vid: A.vid, snap, qty: x.qty, prod: x.prod, loc: x.loc, st: x.st, note: x.note, photo: A.photo, separate: !!A.sep });
   closeAllSheets(); hooks.refresh();
   const after = completedSet(); const done = [...after].some((id) => !before.has(id));
   if (done) { confetti(); buzz([40, 30, 40]); toast('🎉 ' + t('series.completed')); } else toast(merged ? t('add.merged') : t('add.added', { n: snap.name }));

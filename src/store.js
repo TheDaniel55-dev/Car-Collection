@@ -17,7 +17,7 @@ export const uid = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now(
 
 export const newProfile = (name = '') => ({
   id: uid(), name, lang: 'en', theme: 'track', mode: 'sys',
-  opts: { prod: true, carded: false, auto: true, dup: 'exact', photo: 'medium' },
+  opts: { prod: true, carded: false, auto: false, dup: 'exact', photo: 'medium' },
   prefs: { cats: [], brands: [], eras: [], how: 'both', goal: 'series', count: '', buy: [], lines: [] },
   onboarded: false, pin: null, created: Date.now(),
 });
@@ -86,13 +86,13 @@ export function makeSnap(src) {
 }
 
 function findExact(snap, vid) {
-  if (vid && own.byVid.get(vid)?.length) return own.byVid.get(vid)[0];
+  if (vid) { const same = (own.byVid.get(vid) || []).find((o) => (o.snap.cf || '') === (snap.cf || '')); if (same) return same; }
   if (!snap.cf) return null;
   return (own.byKey.get(snap.key) || []).find((o) => !o.vid === !vid && o.snap.cf === snap.cf && norm(o.snap.ser) === norm(snap.ser)) || null;
 }
 
-export async function addOwned({ vid = null, snap, qty = 1, prod = '', loc = '', st = 'loose', note = '', photo = '' }) {
-  const ex = findExact(snap, vid);
+export async function addOwned({ vid = null, snap, qty = 1, prod = '', loc = '', st = 'loose', note = '', photo = '', separate = false }) {
+  const ex = separate ? null : findExact(snap, vid);
   let rec; let merged = false;
   if (ex) { ex.qty += qty; rec = ex; merged = true; if (prod && !ex.prod) ex.prod = codeKey(prod); }
   else rec = { id: uid(), pid: S.profile.id, vid, snap, qty, prod: codeKey(prod), loc, st, note, photo, added: Date.now() };

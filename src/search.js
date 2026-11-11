@@ -135,7 +135,11 @@ export function verdict(key, opt = {}) {
   const cols = [...new Set(mine.map((o) => o.snap.cf).filter(Boolean))];
   const prod = codeKey(opt.prod);
   const sameProd = !!prod && mine.some((o) => codeKey(o.prod) === prod);
-  if (opt.vid && own.byVid.has(opt.vid)) return { level: 'red', reason: 'variant', mine, cols, sameProd };
+  // A catalogue variant is the same car only in the same colour: colour is chosen by the user, never taken from the catalogue.
+  if (opt.vid && own.byVid.has(opt.vid)) {
+    const sameVar = own.byVid.get(opt.vid).filter((o) => (o.snap.cf || '') === (opt.cf || ''));
+    if (sameVar.length) return { level: 'red', reason: 'variant', mine, cols, sameProd };
+  }
   if (opt.cf) {
     const sameCol = mine.filter((o) => o.snap.cf === opt.cf);
     if (sameCol.length) {

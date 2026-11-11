@@ -306,6 +306,18 @@
  "about.libs": "Uses Tesseract.js (Apache-2.0) for text reading, offline.",
  "about.license": "App code © its author. Dataset licence: CC BY-SA.",
  "about.mattel": "Hot Wheels is a trademark of Mattel, Inc. This app is unofficial and not affiliated with or endorsed by Mattel.",
+ "add.colourUnknown": "Unknown colour",
+ "add.pickColour": "Pick the colour you have, or leave it unknown.",
+ "add.wikiColour": "In the database: {c}",
+ "add.separate": "Keep it as a separate car (not a duplicate)",
+ "chk.score": "Rarity score (estimate)",
+ "chk.scoreRange": "{a}–{b} across {n} known versions",
+ "chk.conf.high": "Confidence: good – exact version selected.",
+ "chk.conf.mid": "Confidence: medium – versions are similar. Pick the exact one for a precise score.",
+ "chk.conf.low": "Confidence: low – versions differ a lot. Pick the exact version below.",
+ "chk.conf.none": "Not enough data to estimate rarity. Check online before deciding.",
+ "chk.thWarn": "This model has a Treasure Hunt / Super Treasure Hunt version. Look for the TH logo or special paint and check online.",
+ "chk.dataWarn": "Colour data is missing for this model, so the score can underestimate how rare it is.",
  "update.available": "Update available",
  "update.reload": "Reload"
 }

@@ -106,6 +106,7 @@ nav button b{display:block;font-size:1.25rem;line-height:1.1}nav button.on{color
 .vd{border-radius:24px;padding:22px;color:#fff;animation:pop .55s cubic-bezier(.2,1.6,.4,1)}
 .vd.red{background:#d12f2f}.vd.amber{background:#e69b00;color:#1a1200}.vd.green{background:#23a24d}
 .vd h2{font-size:2.8rem}.vd p{margin:6px 0}.vd .chip{background:#0003;color:inherit}
+.vd .scorebox{background:#0003;border-radius:16px;padding:12px 14px;margin:12px 0;text-align:left}.vd .scorebox .warn{color:inherit;background:#0004;padding:6px 10px;border-radius:10px}.vd .scorebox .btn{margin-top:4px}
 .vd .dot{border-color:#fff8}.vd .dot.lg{width:30px;height:30px}
 @keyframes pop{from{transform:scale(.82);opacity:0;filter:saturate(2) brightness(1.3)}}
 .verdict{border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}

@@ -32,6 +32,16 @@ async function findPages() {
   }
   const pages = new Map();
   for (const t of all) { const m = /^List of (\d{4}) Hot Wheels$/i.exec(t); if (m) { const y = +m[1]; if (y >= FROM && y <= TO) pages.set(y, t); } }
+  // Coverage report: years with no matching page, plus any wiki page titles that mention that year (candidates to support later).
+  const missing = [];
+  for (let y = FROM; y <= TO; y++) if (!pages.has(y)) missing.push(y);
+  if (missing.length) {
+    console.log(`Years with no "List of YYYY Hot Wheels" page: ${missing.join(', ')}`);
+    for (const y of missing) {
+      const cand = all.filter((t) => t.includes(String(y))).slice(0, 8);
+      if (cand.length) console.log(`  ${y}: candidate titles -> ${cand.join(' | ')}`);
+    }
+  }
   return [...pages.entries()].sort((a, b) => a[0] - b[0]);
 }
 

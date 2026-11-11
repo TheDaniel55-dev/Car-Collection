@@ -306,6 +306,18 @@
  "about.libs": "Folosește Tesseract.js (Apache-2.0) pentru citirea textului, offline.",
  "about.license": "Codul aplicației © autorul. Licența datelor: CC BY-SA.",
  "about.mattel": "Hot Wheels este marcă înregistrată a Mattel, Inc. Aplicația este neoficială și nu e afiliată sau susținută de Mattel.",
+ "add.colourUnknown": "Culoare necunoscută",
+ "add.pickColour": "Alege culoarea pe care o ai sau las-o necunoscută.",
+ "add.wikiColour": "În baza de date: {c}",
+ "add.separate": "Păstrează-o ca mașină separată (nu dublură)",
+ "chk.score": "Scor de raritate (estimare)",
+ "chk.scoreRange": "{a}–{b} pe {n} versiuni cunoscute",
+ "chk.conf.high": "Încredere: bună – ai ales versiunea exactă.",
+ "chk.conf.mid": "Încredere: medie – versiunile sunt asemănătoare. Alege-o pe cea exactă pentru un scor precis.",
+ "chk.conf.low": "Încredere: scăzută – versiunile diferă mult. Alege versiunea exactă mai jos.",
+ "chk.conf.none": "Date insuficiente pentru o estimare. Verifică online înainte să decizi.",
+ "chk.thWarn": "Acest model are o versiune Treasure Hunt / Super Treasure Hunt. Caută sigla TH sau vopseaua specială și verifică online.",
+ "chk.dataWarn": "Lipsesc datele despre culori pentru acest model, deci scorul poate subestima cât de rară e.",
  "update.available": "Actualizare disponibilă",
  "update.reload": "Reîncarcă"
 }

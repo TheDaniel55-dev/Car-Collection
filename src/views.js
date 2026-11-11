@@ -116,6 +116,34 @@ export function checkHTML() {
   <div id="chk-res">${checkResult()}</div>`;
 }
 
+/** Rarity shown while checking a car in the shop (without adding it). Honest about how sure it is. */
+function shopScore(pick, vars) {
+  const c = S.chk;
+  const base = (v) => ({ ty: v.ty, ser: v.ser, y: v.y, cy: v.cy, key: pick.key, cf: c.cf || '' });
+  const chosen = c.vid && cat.byId.get(c.vid);
+  let scores = [];
+  let conf = 'none';
+  if (chosen) { scores = [rarityBreakdown(base(chosen))]; conf = 'high'; }
+  else if (vars.length) {
+    const pool = c.ser ? vars.filter((v) => norm(v.ser) === norm(c.ser)) : vars;
+    scores = (pool.length ? pool : vars).map((v) => rarityBreakdown(base(v)));
+    const lo = Math.min(...scores.map((r) => r.score)); const hi = Math.max(...scores.map((r) => r.score));
+    conf = scores.length === 1 || hi - lo <= 10 ? 'mid' : 'low';
+  }
+  if (!scores.length) return `<div class="scorebox"><b>${esc(t('chk.score'))}</b><p class="small">${esc(t('chk.conf.none'))}</p></div>`;
+  const lo = Math.min(...scores.map((r) => r.score)); const hi = Math.max(...scores.map((r) => r.score));
+  const top = scores.find((r) => r.score === hi);
+  const val = lo === hi ? `${hi}` : `${lo}–${hi}`;
+  const hasTH = vars.some((v) => v.ty === 'th' || v.ty === 'sth');
+  const colourData = vars.some((v) => v.cf);
+  return `<div class="scorebox"><div class="row"><b class="g">${esc(t('chk.score'))}</b><span class="chip pill" style="background:${TIER_COLORS[top.tier]}">${val} · ${esc(t('tier.' + top.tier))}</span></div>
+  ${lo === hi ? '' : `<p class="small">${esc(t('chk.scoreRange', { a: lo, b: hi, n: scores.length }))}</p>`}
+  <p class="small">${esc(t('chk.conf.' + conf))}</p>
+  ${hasTH ? `<p class="warn">⚠ ${esc(t('chk.thWarn'))}</p>` : ''}
+  ${colourData ? '' : `<p class="small">${esc(t('chk.dataWarn'))}</p>`}
+  <button type="button" class="btn s" data-act="rarity-how">${esc(t('rarity.how'))}</button></div>`;
+}
+
 function checkResult() {
   const c = S.chk;
   if (!c.q.trim()) return `<p class="mu">${esc(t('chk.hint'))}</p>`;
@@ -135,6 +163,7 @@ function checkResult() {
   <div class="vd ${level}" role="status" aria-live="polite"><h2>${esc(t('v.title.' + level))}</h2><p>${esc(msg)}${v.sameProd ? ' ' + esc(t('v.sameProd')) : ''}</p>
   <div class="row wrap"><b>${esc(pick.name)}</b>${[...pick.bases].slice(0, 1).map((b) => `<span class="chip mono">${esc(b)}</span>`).join('')}</div>
   ${vars.length ? `<p class="small">${esc(t('chk.variants', { n: vars.length, m: own1.length ? Math.min(vars.length, nOwnVars) : 0 }))}</p><div class="sw tight">${vars.slice(0, 48).map((x) => `<button type="button" class="dot lg ${own.byVid.has(x.id) ? 'own' : ''}" style="background:${x.cf ? `var(--c-${x.cf})` : 'transparent'}" data-act="chk-variant" data-id="${esc(x.id)}" title="${esc([x.col, x.ser, x.y].filter(Boolean).join(' · '))}" aria-label="${esc([x.col, x.ser, x.y].filter(Boolean).join(' · '))}"></button>`).join('')}</div>` : ''}
+  ${shopScore(pick, vars)}
   ${own1.length ? `<p class="small">${esc(t('chk.youHave'))}: ${own1.map((o) => `${o.snap.col || cname(o.snap.cf)}${o.qty > 1 ? ' ×' + o.qty : ''}`).join(', ')}</p>` : ''}
   <button type="button" class="btn light" data-act="chk-add">${esc(level === 'red' ? t('chk.addAnyway') : t('add.title'))}</button></div>`;
 }
@@ -146,7 +175,7 @@ acts['chk-col'] = (el) => { S.chk.cf = S.chk.cf === el.dataset.v ? '' : el.datas
 acts['chk-pick'] = (el) => { S.chk.pick = el.dataset.key; S.chk.vid = null; redoCheck(); };
 acts['chk-variant'] = (el) => {
   const v = cat.byId.get(el.dataset.id); if (!v) return;
-  S.chk.cf = v.cf; S.chk.ser = v.ser; S.chk.vid = v.id; hooks.refresh();
+  if (v.cf) S.chk.cf = v.cf; S.chk.ser = v.ser; S.chk.vid = v.id; hooks.refresh();
 };
 acts['chk-add'] = () => {
   const found = searchCastings(S.chk.q, 5); const pick = found.find((x) => x.key === S.chk.pick) || found[0];
