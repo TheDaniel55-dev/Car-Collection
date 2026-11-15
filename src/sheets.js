@@ -115,7 +115,7 @@ function variantsHTML() {
   const rows = shown.map((v) => {
     const n = (own.byVid.get(v.id) || []).reduce((a, o) => a + o.qty, 0);
     const title = [v.y || '', v.ser].filter(Boolean).join(' · ') || v.name;
-    return `<button type="button" class="card row it ${A.cf && v.cf === A.cf ? 'hl' : ''}" data-act="add-variant" data-id="${esc(v.id)}">${dot(v.cf, 'lg')}<span class="g"><b>${esc(title)}</b><span class="mu">${esc([v.col || t('add.colourUnknown'), v.cn, typeLabel(v.ty)].filter(Boolean).join(' · '))}</span></span>${v.toy ? `<span class="chip mono">${esc(v.toy)}</span>` : ''}${n ? `<span class="chip ok">✓ ×${n}</span>` : ''}</button>`;
+    return `<button type="button" class="card row it ${A.cf && v.cf === A.cf ? 'hl' : ''}" data-act="add-variant" data-id="${esc(v.id)}">${dot(v.cf, 'lg')}<span class="g"><b>${esc(title)}</b><span class="mu">${esc([v.col || t('add.colourUnknown'), v.cn, v.tp, typeLabel(v.ty)].filter(Boolean).join(' · '))}</span></span>${v.toy ? `<span class="chip mono">${esc(v.toy)}</span>` : ''}${n ? `<span class="chip ok">✓ ×${n}</span>` : ''}</button>`;
   }).join('');
   return `<button type="button" class="link" data-act="add-back">‹ ${esc(t('back'))}</button>
   <p class="stepl">${esc(t('add.s2'))}</p><h2>${esc(c.name)}</h2><p class="mu">${esc(t('add.pickVariant', { n: vs.length }))}</p>
@@ -139,7 +139,7 @@ acts['f-usetext'] = (el) => { const f = $('#f-name'); if (f) { f.value = el.data
 acts['add-variant'] = (el) => {
   const v = cat.byId.get(el.dataset.id); if (!v) return;
   // The colour is picked by the user (the catalogue colour is only shown as a hint).
-  startForm({ name: v.name, col: '', cf: A.cf || '', wikiCol: v.col || '', ser: v.ser, y: v.y, cy: v.cy, toy: v.toy, base: v.base, num: v.num, ty: v.ty, tp: v.tp, wh: v.wh, alt: v.cn }, { vid: v.id });
+  startForm({ name: v.name, col: '', cf: A.cf || '', wikiCol: v.col || '', ser: v.ser, y: v.y, cy: v.cy, toy: v.toy, base: v.base, num: v.num, ty: v.ty, tp: v.tp, wh: v.wh, made: v.made, alt: v.cn }, { vid: v.id });
 };
 
 /* ---------- details / manual form ---------- */

@@ -39,6 +39,11 @@ Ai două repo-uri: unul **privat** (sursa, acest proiect) și unul **public** `c
 4. Rulează *Publish to public site repo*. (Actualizarea datelor din *Refresh database* funcționează în repo-ul privat; după ea rulează din nou *Publish*.)
 Alternativ, `car-collection-site.zip` conține site-ul deja compilat: îl încarci direct în repo-ul public (fără robot de actualizare a datelor).
 
+## Cum se strânge baza de date
+Robotul citește wiki-ul în două faze: listele anuale („List of YYYY Hot Wheels") dau numele, codul de pe card, seria și numărul, iar pagina fiecărui model dă **culoarea, roțile și țara** — singurul loc unde există. Faza a doua e lentă (o cerere pe secundă), așa că implicit pornește de la 2010; vezi `docs/TODO.md` pentru rularea completă 1968 → azi și pentru ce lipsește încă.
+
+Codul de pe baza mașinii (ex. GRX20) nu există pe wiki, deci aplicația îl învață din ce introduci tu, iar un cod poate aparține mai multor mașini (seturile F1 împart același cod între echipe).
+
 ## Pentru dezvoltatori
 ```
 npm ci

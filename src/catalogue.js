@@ -5,7 +5,8 @@ import { colorFamily } from '../shared/colors.js';
 import * as db from './db.js';
 
 // Compact row layout used inside data shards (see docs/DATA-FORMAT.md)
-export const FIELDS = ['id', 'name', 'toy', 'col', 'ser', 'y', 'ty', 'num', 'base', 'tp', 'wh', 'cy'];
+// 'made' (country) is appended, so older shards that stop at 'cy' still load.
+export const FIELDS = ['id', 'name', 'toy', 'col', 'ser', 'y', 'ty', 'num', 'base', 'tp', 'wh', 'cy', 'made'];
 
 export const cat = {
   ready: false, list: [], byId: new Map(), byKey: new Map(), byCode: new Map(),

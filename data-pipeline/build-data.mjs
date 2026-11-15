@@ -1,8 +1,14 @@
 // Builds data/ from the Hot Wheels Fandom wiki (MediaWiki API). Polite: 1 request/second, descriptive User-Agent.
-// Usage: node data-pipeline/build-data.mjs [--from 1968] [--to 2026] [--out data] [--dry]
+// Two phases:
+//   1. the yearly "List of YYYY Hot Wheels" pages - names, card codes, series, numbers (no colours)
+//   2. each casting's own page - its "Versions" table, which is the only place colours,
+//      wheels and country exist, and the only place themed sets like Formula One appear
+// Usage: node data-pipeline/build-data.mjs [--from 1968] [--to 2026] [--castings-from 2010] [--no-castings] [--out data] [--dry]
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import fs from 'node:fs';
 import { parsePage } from './parse.mjs';
+import { parseVersions, castingLinks, mergeRows } from './castings.mjs';
 import { progress, sleep, writeDataset, readRows } from './lib.mjs';
 
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
@@ -11,6 +17,10 @@ const FROM = Number(arg('from', 1968)); const TO = Number(arg('to', new Date().g
 const API = 'https://hotwheels.fandom.com/api.php';
 const UA = 'car-collection-data-bot/1.0 (+https://github.com/; open-source hobby project, polite 1 req/s)';
 const MIN_KEEP = 0.7; // refuse to publish if fewer than 70% of the previous rows come back
+// Phase 2 is the slow part (one page per casting, 1 req/s), so it has its own year floor.
+const CAST_FROM = Number(arg('castings-from', 2010));
+const NO_CAST = process.argv.includes('--no-castings');
+const EXTRA = JSON.parse(fs.readFileSync(new URL('./extra-pages.json', import.meta.url), 'utf8')).indexPages || [];
 
 async function api(params, tries = 4) {
   const url = API + '?' + new URLSearchParams({ format: 'json', formatversion: '2', ...params });
@@ -63,6 +73,39 @@ async function discoverOtherLists() {
   } catch { /* report only */ }
 }
 
+/** Phase 2: read every casting page linked from the lists in range, plus the extra collection pages. */
+async function crawlCastings(listHtml, failed) {
+  const titles = new Set();
+  for (const html of listHtml) for (const x of castingLinks(html)) titles.add(x);
+  for (const page of EXTRA) {
+    try {
+      const j = await api({ action: 'parse', page, prop: 'text', disableeditsection: '1', redirects: '1' });
+      const found = castingLinks(j.parse?.text || '');
+      found.forEach((x) => titles.add(x));
+      console.log(`Collection page "${page}": ${found.length} castings`);
+    } catch (e) { failed.push(`index ${page}: ${e.message}`); }
+    await sleep(1000);
+  }
+  const list = [...titles].sort();
+  if (!list.length) { console.log('No casting pages found - skipping phase 2.'); return []; }
+  console.log(`Phase 2: ${list.length} casting pages (from ${CAST_FROM} onwards), about ${Math.ceil(list.length / 60)} min at 1 req/s`);
+  const bar = progress('Phase 2/2 - casting pages', list.length);
+  const out = []; let empty = 0;
+  for (const title of list) {
+    try {
+      const j = await api({ action: 'parse', page: title, prop: 'text', disableeditsection: '1', redirects: '1' });
+      const got = parseVersions(j.parse?.text || '', j.parse?.title || title);
+      if (!got.length) empty++;
+      out.push(...got);
+      bar.tick(`${title.slice(0, 26)}: ${got.length}`);
+    } catch (e) { failed.push(`casting ${title}: ${e.message}`); bar.tick('FAILED'); }
+    await sleep(1000);
+  }
+  bar.done();
+  console.log(`Phase 2: ${out.length} variants, ${empty} pages without a versions table`);
+  return out;
+}
+
 async function main() {
   console.log(`Output: ${OUT}`);
   const prev = readRows(OUT);
@@ -70,29 +113,37 @@ async function main() {
   try { await discoverOtherLists(); } catch (e) { console.log('discovery skipped:', e.message); }
   if (!pages.length) throw new Error('No "List of YYYY Hot Wheels" pages found - wiki layout changed?');
   console.log(`Found ${pages.length} yearly pages`);
-  const bar = progress('Downloading years', pages.length);
-  const rows = []; const failed = [];
+  const bar = progress('Phase 1/2 - yearly lists', pages.length);
+  const rows = []; const failed = []; const listHtml = [];
   for (const [y, title] of pages) {
     try {
       const j = await api({ action: 'parse', page: title, prop: 'text', disableeditsection: '1', redirects: '1' });
-      const got = parsePage(j.parse?.text || '', y);
+      const html = j.parse?.text || '';
+      const got = parsePage(html, y);
       rows.push(...got);
+      if (y >= CAST_FROM) listHtml.push(html);
       bar.tick(`${y}: ${got.length} rows`);
     } catch (e) { failed.push(`${y}: ${e.message}`); bar.tick(`${y}: FAILED`); }
     await sleep(1000);
   }
   bar.done();
+
+  const castRows = NO_CAST ? [] : await crawlCastings(listHtml, failed);
+  const merged = mergeRows(rows, castRows);
+  console.log(`Rows: ${rows.length} from the lists + ${castRows.length} from casting pages -> ${merged.length} after merging`);
   // ---- health check: fail rather than publish broken data ----
   const realPrev = prev.manifest && !prev.manifest.seed ? prev.rows.length : 0;
   const problems = [];
-  if (rows.length < 500) problems.push(`only ${rows.length} rows parsed (expected thousands)`);
-  if (failed.length > pages.length * 0.1) problems.push(`${failed.length} pages failed: ${failed.slice(0, 5).join('; ')}`);
-  if (realPrev && rows.length < realPrev * MIN_KEEP) problems.push(`rows dropped from ${realPrev} to ${rows.length} (<${MIN_KEEP * 100}%)`);
-  const noName = rows.filter((r) => !r[1]).length;
+  if (merged.length < 500) problems.push(`only ${merged.length} rows parsed (expected thousands)`);
+  if (failed.length > pages.length * 0.1 + 40) problems.push(`${failed.length} pages failed: ${failed.slice(0, 5).join('; ')}`);
+  if (realPrev && merged.length < realPrev * MIN_KEEP) problems.push(`rows dropped from ${realPrev} to ${merged.length} (<${MIN_KEEP * 100}%)`);
+  const noName = merged.filter((r) => !r[1]).length;
   if (noName) problems.push(`${noName} rows without a name`);
   if (problems.length) { console.error('HEALTH CHECK FAILED - keeping existing data:\n - ' + problems.join('\n - ')); process.exit(2); }
-  if (process.argv.includes('--dry')) { console.log(`dry run ok: ${rows.length} rows`); return; }
-  const { manifest, changed } = writeDataset(OUT, rows, {
+  const withCol = merged.filter((r) => String(r[3] || '').trim()).length;
+  console.log(`Colour filled in ${withCol}/${merged.length} rows (${Math.round((withCol / merged.length) * 100)}%)`);
+  if (process.argv.includes('--dry')) { console.log(`dry run ok: ${merged.length} rows`); return; }
+  const { manifest, changed } = writeDataset(OUT, merged, {
     name: 'Hot Wheels Wiki (Fandom)', url: 'https://hotwheels.fandom.com/', license: 'CC BY-SA 3.0 (verify on the wiki)', licenseUrl: 'https://www.fandom.com/licensing',
   });
   console.log(changed ? `Dataset v${manifest.version}: ${manifest.total} rows in ${manifest.shards.length} shards` : 'No changes.');

@@ -1,0 +1,8 @@
+{
+  "_comment": "Index pages whose tables link to casting pages that the yearly 'List of YYYY Hot Wheels' pages do not cover (premium and themed collections). Add more as they are found - see docs/TODO.md.",
+  "indexPages": [
+    "2025 Formula One Collection",
+    "2026 Formula One Collection",
+    "2027 Formula One Collection"
+  ]
+}

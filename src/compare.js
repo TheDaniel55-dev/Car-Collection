@@ -31,7 +31,7 @@ function sideData(x) {
     const s = sel.snap;
     d = { name: s.name, base: s.base, toy: s.toy, cf: s.cf, col: s.col, ser: s.ser, y: s.y, cy: s.cy, num: s.num, ty: s.ty, made: s.made, tp: s.tp, wh: s.wh, prod: sel.prod };
   } else if (v) {
-    d = { name: v.name, base: v.base || [...pick.bases][0] || '', toy: v.toy, cf: x.cf, col: '', ser: v.ser, y: v.y, cy: v.cy, num: v.num, ty: v.ty, made: '', tp: v.tp, wh: v.wh, prod: '' };
+    d = { name: v.name, base: v.base || [...pick.bases][0] || '', toy: v.toy, cf: x.cf, col: '', ser: v.ser, y: v.y, cy: v.cy, num: v.num, ty: v.ty, made: v.made || '', tp: v.tp, wh: v.wh, prod: '' };
   } else {
     d = { name: pick.name, base: [...pick.bases][0] || '', toy: '', cf: x.cf, col: '', ser: '', y: 0, cy: 0, num: '', ty: '', made: '', tp: '', wh: '', prod: '' };
   }

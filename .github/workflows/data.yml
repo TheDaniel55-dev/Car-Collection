@@ -3,6 +3,11 @@ on:
   schedule:
     - cron: "17 4 3 * *"   # monthly, day 3, 04:17 UTC
   workflow_dispatch:
+    inputs:
+      castings_from:
+        description: 'Read casting pages (the only source of colours) from this year onwards. 2010 takes ~30 min, 1968 takes ~2 h.'
+        default: '2010'
+        required: true
 permissions:
   contents: write
   pages: write
@@ -23,7 +28,10 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Build dataset (fails instead of publishing broken data)
-        run: npm run data
+        # Phase 1 reads the yearly lists, phase 2 reads each casting page for colours.
+        # A scheduled run uses 2010; see docs/TODO.md about one full 1968-onwards run.
+        run: npm run data -- --castings-from "${{ inputs.castings_from || '2010' }}"
+        timeout-minutes: 330
       - id: commit
         run: |
           git config user.name "car-collection-bot"
