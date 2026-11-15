@@ -13,6 +13,7 @@ import './styles.css';
 import { t, setLang } from './i18n.js';
 import { initStore, S, isDark } from './store.js';
 import { loadCatalogue, syncCatalogue, cat } from './catalogue.js';
+import { loadMissing } from './missing.js';
 import { acts, ins, chs, hooks } from './registry.js';
 import { maybeShowNews, markNewsSeen } from './news.js';
 import { toastAction, toast, $, $$, closeSheet, sheetOpen } from './ui.js';
@@ -149,6 +150,7 @@ async function boot() {
     S.f.sort = 'new';
     render();
     await loadCatalogue();
+    await loadMissing();
     render();
     navigator.storage?.persist?.().catch(() => {});
     refreshStorage();

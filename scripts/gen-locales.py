@@ -34,6 +34,14 @@ a('add.notListed','Not listed? Add it manually','Nu e în listă? Adaug-o manual
 a('add.none','No match in the database.','Nicio potrivire în baza de date.')
 a('add.details','Details','Detalii'); a('add.yours','added by you','adăugat de tine')
 a('add.nvar','{n} variants','{n} variante'); a('add.pickVariant','Pick the variant ({n})','Alege varianta ({n})'); a('add.more','+{n} more – refine the search','+{n} în plus – restrânge căutarea')
+for k,e,r in [('miss.report','Report it as missing','Raportează că lipsește'),
+ ('miss.thanks','Noted on this device','Notat pe telefon'),
+ ('miss.title','Missing from the database','Lipsesc din baza de date'),
+ ('miss.help','{n} searches found nothing. Copy the list and send it, so the sources can be extended.','{n} căutări nu au găsit nimic. Copiază lista și trimite-o, ca să completăm sursele.'),
+ ('miss.copy','Copy the list','Copiază lista'),
+ ('miss.copied','Copied','Copiat'),
+ ('miss.clear','Clear the list','Golește lista'),
+ ('miss.selectAll','Select the text and copy it.','Selectează textul și copiază-l.')]: a(k,e,r)
 a('add.sharedCode','{n} cars carry this code — pick yours','{n} mașini au acest cod — alege-o pe a ta')
 a('chk.sharedCode','{n} cars carry this code. ✓ = already in your collection.','{n} mașini au acest cod. ✓ = o ai deja în colecție.')
 a('add.filterColour','Filter by colour','Filtrează după culoare'); a('add.colourDetected','Detected colour: {c}','Culoare detectată: {c}')

@@ -8,6 +8,7 @@ import { own, searchCastings, matchOcr, castingByKey, variantsOf, ownedOf, verdi
 import { S, opt, saveProfile, wipeCollection } from './store.js';
 import { progress, seriesGroups } from './series.js';
 import { rarityBreakdown, TIER_COLORS } from './rarity.js';
+import { missingList, missingText, clearMissing } from './missing.js';
 import { readPhoto } from './photo.js';
 import { recognize } from './ocr.js';
 import { exportEncrypted, buildBackup, toCSV, saveFile, parseBackup, restore } from './backup.js';
@@ -184,7 +185,8 @@ function checkResult() {
   const shared = sharedCode(c.q);
   const found = searchCastings(c.q, Math.max(5, Math.min(30, shared)));
   if (!found.length) {
-    return `<div class="vd amber"><h2>${esc(t('chk.nf'))}</h2><p>${esc(t('chk.nfText'))}</p><button type="button" class="btn light" data-act="open-add">${esc(t('add.manual'))}</button></div>`;
+    return `<div class="vd amber"><h2>${esc(t('chk.nf'))}</h2><p>${esc(t('chk.nfText'))}</p><button type="button" class="btn light" data-act="open-add">${esc(t('add.manual'))}</button>
+    <button type="button" class="btn light" data-act="miss-report" data-q="${esc(c.q.trim())}" data-where="check">${esc(t('miss.report'))}</button></div>`;
   }
   const pick = found.find((x) => x.key === c.pick) || found[0];
   const v = verdict(pick.key, { cf: c.cf, ser: c.ser, prod: c.prod, vid: c.vid, mode: opt('dup') });
@@ -241,6 +243,16 @@ acts['chk-variant'] = (el) => {
 acts['chk-add'] = () => {
   const found = searchCastings(S.chk.q, 5); const pick = found.find((x) => x.key === S.chk.pick) || found[0];
   openAdd({ key: pick?.key, cf: S.chk.cf, q: S.chk.q });
+};
+acts['miss-copy'] = async () => {
+  const text = missingText();
+  try { await navigator.clipboard.writeText(text); toast(t('miss.copied')); }
+  catch { openSheet(`<h2>${esc(t('miss.title'))}</h2><p class="mu">${esc(t('miss.selectAll'))}</p><textarea class="area" rows="10" readonly>${esc(text)}</textarea>`); }
+};
+let missArm = 0;
+acts['miss-clear'] = async (el) => {
+  if (Date.now() - missArm > 4000) { missArm = Date.now(); el.textContent = t('confirmTap'); return; }
+  missArm = 0; await clearMissing(); hooks.refresh(); toast(t('removed'));
 };
 acts['shop-toggle'] = () => { S.shop = !S.shop; hooks.refresh(); };
 
@@ -384,6 +396,9 @@ export function settingsHTML() {
     <div class="row wrap"><label class="btn s file">${esc(t('bk.import'))}<input type="file" accept=".json,application/json,text/plain" class="vh" data-ch="bk-file"></label><button type="button" class="btn s" data-act="bk-paste">${esc(t('bk.paste'))}</button></div></div>
   <div class="card"><h3>${esc(t('set.pin'))}</h3><p class="mu">${esc(t('pin.help'))}</p><div class="row wrap"><button type="button" class="btn s" data-act="pin-set">${esc(p.pin ? t('pin.change') : t('pin.set'))}</button>${p.pin ? `<button type="button" class="btn s" data-act="pin-off">${esc(t('pin.off'))}</button>` : ''}</div></div>
   <button type="button" class="btn s" data-act="open-about">${esc(t('about.title'))}</button>
+  ${missingList().length ? `<div class="card"><h3>${esc(t('miss.title'))}</h3><p class="mu">${esc(t('miss.help', { n: missingList().length }))}</p>
+    <div class="row wrap"><button type="button" class="btn s" data-act="miss-copy">${esc(t('miss.copy'))}</button><button type="button" class="btn s" data-act="miss-clear">${esc(t('miss.clear'))}</button></div>
+    <p class="mu small">${esc(missingList().slice(0, 8).map((x) => x.q).join(' · '))}</p></div>` : ''}
   <div class="card"><h3>${esc(t('set.danger'))}</h3><button type="button" class="btn danger" data-act="wipe">${esc(t('wipe'))}</button></div>
   <div class="card"><h3>${esc(t('set.version'))}</h3>
     <p class="verline"><b>v${esc(APP_VER)}</b> <span class="mu">· ${esc(APP_SHA)}${APP_BUILT ? ' · ' + esc(fmtDate(APP_BUILT)) : ''}</span></p>

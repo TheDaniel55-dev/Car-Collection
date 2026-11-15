@@ -42,7 +42,7 @@ Alternativ, `car-collection-site.zip` conține site-ul deja compilat: îl încar
 ## Cum se strânge baza de date
 Robotul citește wiki-ul în două faze: listele anuale („List of YYYY Hot Wheels") dau numele, codul de pe card, seria și numărul, iar pagina fiecărui model dă **culoarea, roțile și țara** — singurul loc unde există. Faza a doua e lentă (o cerere pe secundă), așa că implicit pornește de la 2010; vezi `docs/TODO.md` pentru rularea completă 1968 → azi și pentru ce lipsește încă.
 
-Codul de pe baza mașinii (ex. GRX20) nu există pe wiki, deci aplicația îl învață din ce introduci tu, iar un cod poate aparține mai multor mașini (seturile F1 împart același cod între echipe).
+Codul de pe baza mașinii (ex. GRX20) este codul de pe card al primei lansări a modelului, iar robotul îl preia de pe pagina fiecărui model. Un cod poate aparține mai multor mașini (seturile F1 împart același cod între echipe), iar aplicația învață și codurile pe care le introduci tu.
 
 ## Pentru dezvoltatori
 ```

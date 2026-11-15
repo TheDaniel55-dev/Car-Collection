@@ -1,7 +1,7 @@
 // Fixtures copied from the real wiki tables (checked 15 Nov 2026):
 // a normal casting page, and an F1 page whose columns differ.
 import assert from 'node:assert/strict';
-import { parseVersions, castingLinks } from '../castings.mjs';
+import { parseVersions, castingLinks, parsePremiumPage } from '../castings.mjs';
 
 const normal = `<h2>Versions</h2><table class="wikitable sortable"><tr>
 <th>Col #</th><th>Year</th><th>Series</th><th>Color</th><th>Tampo</th><th>Base Color/Type</th><th>Window Color</th><th>Interior Color</th><th>Wheel Type</th><th>Toy #</th><th>Country</th><th>Notes</th><th>Photo</th></tr>
@@ -22,7 +22,9 @@ assert.equal(a[0].col, 'Yellow'); assert.equal(a[1].col, 'Blue');
 assert.equal(a[0].name, 'Mazda Autozam');
 assert.equal(a[0].toy, 'HRY51'); assert.equal(a[0].made, 'Malaysia');
 assert.equal(a[0].wh, 'MC5'); assert.equal(a[0].num, '001'); assert.equal(a[0].y, 2024);
-assert.equal(a[0].base, '', 'the wiki never carries the casting code stamped under the car');
+// The code stamped under the car is the debut release's toy number, shared by every later release.
+assert.equal(a[0].base, 'HRY51', 'base code taken from the debut row');
+assert.equal(a[1].base, 'HRY51', 'the 2nd Color release keeps the same code under the car');
 assert.notEqual(a[0].id, a[1].id, 'ids must differ per variant');
 
 const b = parseVersions(f1, 'Red Bull RB20').map(o);
@@ -32,6 +34,33 @@ assert.ok(b[0].tp.includes('Max Verstappen'), b[0].tp);
 assert.ok(b[1].tp.includes('Sergio Pérez'), b[1].tp);
 assert.equal(b[0].toy, 'JBM12'); assert.equal(b[1].toy, 'JBM19');
 assert.equal(b[0].ser, 'Formula One Collection');
+
+// a "New Model" note names the debut row even when it is not the first row listed
+{
+  const mixed = `<table class="wikitable"><tr><th>Year</th><th>Series</th><th>Color</th><th>Toy #</th><th>Notes</th></tr>
+  <tr><td>2024</td><td>HW Exotics</td><td>Red</td><td>HXZ99</td><td></td></tr>
+  <tr><td>2021</td><td>HW Speed Graphics</td><td>White</td><td>GRX20</td><td>New ModelBase code(s): N14</td></tr></table>`;
+  const r = parseVersions(mixed, "'20 Toyota GR Supra").map(o);
+  assert.equal(r.length, 2);
+  assert.equal(r[0].base, 'GRX20', 'both rows carry the debut code');
+  assert.equal(r[1].base, 'GRX20');
+  assert.equal(r[0].toy, 'HXZ99', 'the toy code of each release is untouched');
+}
+
+// premium per-year page: "Series #" must become the number, never the series name
+{
+  const prem = `<h3>Car Culture: Modern Classics</h3><table class="wikitable"><tr>
+  <th>Toy #</th><th>Series #</th><th>Casting Name</th><th>Body Color</th><th>Wheel Type</th><th>Notes</th><th>Photo Loose</th></tr>
+  <tr><td>HKC80</td><td>1/5</td><td>'71 Porsche 911</td><td>Yellow</td><td>RRLW5</td><td>Base code(s): T01, T03</td><td></td></tr></table>`;
+  const r = parsePremiumPage(prem, 2024, '2024 Car Culture').map(o);
+  assert.equal(r.length, 1);
+  assert.equal(r[0].name, "'71 Porsche 911");
+  assert.equal(r[0].col, 'Yellow');
+  assert.equal(r[0].num, '1/5');
+  assert.equal(r[0].ser, 'Car Culture: Modern Classics');
+  assert.equal(r[0].ty, 'p', 'Car Culture classifies as premium');
+  assert.equal(r[0].toy, 'HKC80');
+}
 
 const links = castingLinks(`<table class="wikitable"><tr><th>Toy #</th><th>Casting Name</th></tr>
 <tr><td>JBM09</td><td><a href="/wiki/Alpine_A524">BWT Alpine F1 Team - A524</a></td></tr>
