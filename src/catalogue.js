@@ -55,7 +55,9 @@ export async function loadCatalogue() {
   const rows = await db.getAll('variants');
   indexCatalogue(rows);
   const codes = await db.getAll('codes');
-  cat.learned = new Map(codes.map((c) => [c.code, c.key]));
+  // One code can belong to SEVERAL castings (a 2024 F1 series shares one base code across
+  // every team). Old records held a single key - keep reading them.
+  cat.learned = new Map(codes.map((c) => [c.code, c.keys || (c.key ? [c.key] : [])]));
   const man = await db.getMeta('manifest');
   cat.manifest = man || null;
   cat.seed = !!man?.seed;
@@ -66,9 +68,19 @@ export async function loadCatalogue() {
 export async function learnCode(base, key) {
   const code = codeKey(base);
   if (code.length < 3 || !key) return;
-  if (cat.learned.get(code) === key) return;
-  cat.learned.set(code, key);
-  await db.put('codes', { code, key });
+  const keys = cat.learned.get(code) || [];
+  if (keys.includes(key)) return;
+  keys.push(key);
+  cat.learned.set(code, keys);
+  await db.put('codes', { code, keys });
+}
+
+/** Drop one casting from a learned code. */
+export async function forgetCode(base, key) {
+  const code = codeKey(base);
+  const keys = (cat.learned.get(code) || []).filter((k) => k !== key);
+  if (keys.length) { cat.learned.set(code, keys); await db.put('codes', { code, keys }); }
+  else { cat.learned.delete(code); await db.del('codes', code); }
 }
 
 async function fetchJSON(url, opts) {

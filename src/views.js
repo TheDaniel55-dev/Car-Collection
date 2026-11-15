@@ -4,7 +4,7 @@ import { brandOf, CATEGORIES } from '../shared/brands.js';
 import { FAMILIES } from '../shared/colors.js';
 import { t, tl, fmtDate, getLang } from './i18n.js';
 import { cat, syncCatalogue } from './catalogue.js';
-import { own, searchCastings, matchOcr, castingByKey, variantsOf, ownedOf, verdict } from './search.js';
+import { own, searchCastings, matchOcr, castingByKey, variantsOf, ownedOf, verdict, sharedCode } from './search.js';
 import { S, opt, saveProfile, wipeCollection } from './store.js';
 import { progress, seriesGroups } from './series.js';
 import { rarityBreakdown, TIER_COLORS } from './rarity.js';
@@ -181,7 +181,8 @@ function shopScore(pick, vars) {
 function checkResult() {
   const c = S.chk;
   if (!c.q.trim()) return `<p class="mu">${esc(t('chk.hint'))}</p>${recentHTML()}`;
-  const found = searchCastings(c.q, 5);
+  const shared = sharedCode(c.q);
+  const found = searchCastings(c.q, Math.max(5, Math.min(30, shared)));
   if (!found.length) {
     return `<div class="vd amber"><h2>${esc(t('chk.nf'))}</h2><p>${esc(t('chk.nfText'))}</p><button type="button" class="btn light" data-act="open-add">${esc(t('add.manual'))}</button></div>`;
   }
@@ -193,7 +194,10 @@ function checkResult() {
   const nOwnVars = new Set(own1.map((o) => o.vid || o.id)).size;
   const msg = t(`v.${v.level}.${v.reason}`, { c: cname(c.cf), cols: v.cols.map(cname).join(', ') });
   if (level === 'red') buzz([60, 40, 60]); else buzz(25);
-  return `${found.length > 1 ? `<div class="chips wrapc">${found.map((x) => `<button type="button" class="pl ${x.key === pick.key ? 'on' : ''}" data-act="chk-pick" data-key="${esc(x.key)}">${esc(x.name)}</button>`).join('')}</div>` : ''}
+  return `${found.length > 1 ? `${shared > 1 ? `<p class="small">${esc(t('chk.sharedCode', { n: shared }))}</p>` : ''}<div class="chips wrapc">${found.map((x) => {
+    const q = ownedOf(x.key).reduce((a, o) => a + o.qty, 0);
+    return `<button type="button" class="pl ${x.key === pick.key ? 'on' : ''}" data-act="chk-pick" data-key="${esc(x.key)}">${q ? '✓ ' : ''}${esc(x.name)}${q > 1 ? ` ×${q}` : ''}</button>`;
+  }).join('')}</div>` : ''}
   <div class="vd ${level}" role="status" aria-live="polite"><h2>${esc(t('v.title.' + level))}</h2><p>${esc(msg)}${v.sameProd ? ' ' + esc(t('v.sameProd')) : ''}</p>
   <div class="row wrap"><b>${esc(pick.name)}</b>${[...pick.bases].slice(0, 1).map((b) => `<span class="chip mono">${esc(b)}</span>`).join('')}</div>
   ${vars.length ? `<p class="small">${esc(t('chk.variants', { n: vars.length, m: own1.length ? Math.min(vars.length, nOwnVars) : 0 }))}</p><div class="sw tight">${vars.slice(0, 48).map((x) => `<button type="button" class="dot lg ${own.byVid.has(x.id) ? 'own' : ''}" style="background:${x.cf ? `var(--c-${x.cf})` : 'transparent'}" data-act="chk-variant" data-id="${esc(x.id)}" title="${esc([x.col, x.ser, x.y].filter(Boolean).join(' · '))}" aria-label="${esc([x.col, x.ser, x.y].filter(Boolean).join(' · '))}"></button>`).join('')}</div>` : ''}

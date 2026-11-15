@@ -1,0 +1,30 @@
+# Diagnostic run: prints what the wiki pages really contain, so the parser can be corrected.
+# Actions -> Probe wiki data -> Run workflow. Then copy the log from the "Probe" step.
+name: Probe wiki data
+on:
+  workflow_dispatch:
+    inputs:
+      page:
+        description: 'Wiki page to inspect'
+        default: 'List of 2024 Hot Wheels'
+        required: true
+      search:
+        description: 'Also list pages matching this text (optional, e.g. Formula 1)'
+        default: 'Formula 1'
+        required: false
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Probe
+        run: node data-pipeline/probe.mjs --page "${{ inputs.page }}" --search "${{ inputs.search }}" --tables 8 | tee probe.log
+      - uses: actions/upload-artifact@v4
+        with:
+          name: probe-log
+          path: probe.log

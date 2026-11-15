@@ -10,6 +10,7 @@ let n = 0; const ok = (name, fn) => Promise.resolve().then(fn).then(() => { n++;
 
 const { castKey, codeKey, levenshtein } = await L('/shared/text.js');
 const { colorFamily } = await L('/shared/colors.js');
+const { brandOf } = await L('/shared/brands.js');
 const { classifyType } = await L('/shared/classify.js');
 const { rarityBreakdown, tierOf } = await L('/src/rarity.js');
 const { encryptJSON, decryptJSON } = await L('/src/crypto.js');
@@ -121,6 +122,41 @@ await ok('card text -> code and likely name (manual add after a scan)', () => {
   const g2 = S.ocrGuess('HYWB4 FERRARI SF9O STRADALE\n1:64 SCALE DIECAST');
   assert.ok(g2.names[0] && /Ferrari/.test(g2.names[0]), JSON.stringify(g2));
   assert.equal(S.ocrGuess('').code, '');
+});
+console.log('one code shared by several cars (the F1 2024 case)');
+await ok('catalogue: one toy code -> every casting that uses it', () => {
+  const shared = [
+    ['f1', 'Red Bull RB20', 'HRT22', 'Blue', 'HW F1 2024', 2024, 'm', '1/10', '', '', '', 2024],
+    ['f2', 'Ferrari SF-24', 'HRT22', 'Red', 'HW F1 2024', 2024, 'm', '2/10', '', '', '', 2024],
+    ['f3', 'McLaren MCL38', 'HRT22', 'Orange', 'HW F1 2024', 2024, 'm', '3/10', '', '', '', 2024],
+  ].map(cat.rowToVariant);
+  cat.indexCatalogue(shared);
+  S.indexOwned([]);
+  assert.equal(S.sharedCode('HRT22'), 3);
+  assert.equal(S.searchCastings('HRT22', 30).length, 3);
+});
+await ok('manual cars: one base code -> every car he typed it on', () => {
+  const car = (name, cf) => ({ id: 'o' + name, vid: null, qty: 1, prod: '', snap: { key: castKey(name), name, cf, ser: 'F1 2024', base: 'ZQ9001' } });
+  cat.indexCatalogue([]);
+  S.indexOwned([car('Red Bull RB20', 'blue'), car('Ferrari SF-24', 'red'), car('Alpine A524', 'pink')]);
+  assert.equal(S.sharedCode('zq9001'), 3, 'all three must come back, not only the last one added');
+  assert.deepEqual(S.searchCastings('ZQ9001', 30).map((c) => c.name).sort(), ['Alpine A524', 'Ferrari SF-24', 'Red Bull RB20']);
+});
+await ok('learnCode keeps every casting taught for one code', async () => {
+  cat.indexCatalogue([
+    cat.rowToVariant(['a1', 'Red Bull RB20', '', '', '', 2024, 'm', '', '', '', '', '']),
+    cat.rowToVariant(['a2', 'Ferrari SF-24', '', '', '', 2024, 'm', '', '', '', '', '']),
+  ]);
+  S.indexOwned([]);
+  await cat.learnCode('ZQ9002', castKey('Red Bull RB20'));
+  await cat.learnCode('ZQ9002', castKey('Ferrari SF-24'));
+  assert.equal(S.sharedCode('ZQ9002'), 2);
+  await cat.forgetCode('ZQ9002', castKey('Ferrari SF-24'));
+  assert.equal(S.sharedCode('ZQ9002'), 1);
+});
+await ok('brandOf reads F1 teams', () => {
+  assert.equal(brandOf('Red Bull RB20'), 'Red Bull');
+  assert.equal(brandOf('Ferrari SF-24'), 'Ferrari');
 });
 await server.close();
 console.log(process.exitCode ? 'FAILED' : `all ${n} logic tests passed`);

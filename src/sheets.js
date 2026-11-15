@@ -5,7 +5,7 @@ import { PALETTE, FAMILIES, colorFamily } from '../shared/colors.js';
 import { classifyType } from '../shared/classify.js';
 import { t, tl, setLang, fmtDate } from './i18n.js';
 import { cat, syncCatalogue } from './catalogue.js';
-import { own, searchCastings, matchOcr, ocrGuess, castingByKey, variantsOf, ownedOf, verdict } from './search.js';
+import { own, searchCastings, matchOcr, ocrGuess, castingByKey, variantsOf, ownedOf, verdict, sharedCode, castingsForCode } from './search.js';
 import { S, opt, addOwned, saveOwned, removeOwned, makeSnap, saveProfile, switchProfile, createProfile, deleteProfile } from './store.js';
 import { progress } from './series.js';
 import { rarityBreakdown, BASE_POINTS, TIER_COLORS, TIERS } from './rarity.js';
@@ -37,11 +37,17 @@ function notFoundHTML() {
 }
 
 function resultRows() {
-  const list = A.q ? searchCastings(A.q, 7) : [];
+  // A code can be shared by many cars (an F1 set shares one base code across the teams),
+  // so an exact-code hit is never cut down to the first few.
+  const shared = A.q ? sharedCode(A.q) : 0;
+  const list = A.q ? searchCastings(A.q, Math.max(7, Math.min(30, shared))) : [];
   if (!list.length) return A.q ? notFoundHTML() : `<p class="mu">${esc(t('add.hint'))}</p>`;
-  return list.map((c) => {
-    const n = ownedOf(c.key).reduce((a, o) => a + o.qty, 0);
-    return `<button type="button" class="card row it" data-act="add-pick" data-key="${esc(c.key)}"><span class="g"><b>${esc(c.name)}</b><span class="mu">${esc([c.brand, years(c), c.count ? t('add.nvar', { n: c.count }) : t('add.yours')].filter(Boolean).join(' · '))}</span></span>${n ? `<span class="chip ok">✓ ×${n}</span>` : ''}</button>`;
+  const hint = shared > 1 ? `<p class="small">${esc(t('add.sharedCode', { n: shared }))}</p>` : '';
+  return hint + list.map((c) => {
+    const mine = ownedOf(c.key);
+    const n = mine.reduce((a, o) => a + o.qty, 0);
+    const cols = [...new Set(mine.map((o) => o.snap.cf).filter(Boolean))].slice(0, 6);
+    return `<button type="button" class="card row it" data-act="add-pick" data-key="${esc(c.key)}"><span class="g"><b>${esc(c.name)}</b><span class="mu">${esc([c.brand, years(c), c.count ? t('add.nvar', { n: c.count }) : t('add.yours')].filter(Boolean).join(' · '))}</span>${cols.length ? `<span class="mini">${cols.map((x) => dot(x)).join('')}</span>` : ''}</span>${n ? `<span class="chip ok">✓ ×${n}</span>` : ''}</button>`;
   }).join('');
 }
 
@@ -219,8 +225,10 @@ ins['f-dup'] = refreshDup;
 chs['f-sep'] = (el) => { if (A) A.sep = el.checked; };
 ins['f-basefill'] = (el) => {
   const code = codeKey(el.value); if (code.length < 5) return;
-  const key = [...(searchCastings(code, 1))].find((c) => c.score >= 100)?.key;
-  const c = key && castingByKey(key);
+  // Only fill the name when the code belongs to exactly ONE car - a shared code would
+  // otherwise stamp another team's name on this one.
+  const keys = castingsForCode(code);
+  const c = keys.length === 1 && castingByKey(keys[0]);
   if (c && !$('#f-name').value) { $('#f-name').value = c.name; refreshDup(); }
 };
 acts['f-col'] = (el) => {
@@ -314,7 +322,7 @@ acts['rarity-how'] = (el) => {
 };
 
 /* =============================== ONBOARDING =============================== */
-const CAT_IDS = ['jdm', 'european', 'muscle', 'exotics', 'trucks', 'racing', 'fantasy', 'classics', 'movie'];
+const CAT_IDS = ['jdm', 'european', 'muscle', 'exotics', 'f1', 'trucks', 'racing', 'fantasy', 'classics', 'movie'];
 const ERA_IDS = ['pre80', '80s', '90s', '00s', 'new'];
 const BRAND_PICK = ['Toyota', 'Nissan', 'Honda', 'Mazda', 'Subaru', 'Ford', 'Chevrolet', 'Dodge', 'Porsche', 'BMW', 'Audi', 'Mercedes-Benz', 'Volkswagen', 'Lamborghini', 'Ferrari', 'McLaren', 'Jeep', 'Volvo'];
 const THEME_IDS = ['track', 'purple', 'show', 'neon'];

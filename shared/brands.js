@@ -6,6 +6,7 @@ export const BRANDS = [
   'Lancia', 'Lexus', 'Lincoln', 'Lotus', 'Maserati', 'Mazda', 'McLaren', 'Mercury', 'MG', 'Mini', 'Mitsubishi',
   'Morris', 'Nissan', 'Oldsmobile', 'Opel', 'Pagani', 'Peugeot', 'Plymouth', 'Pontiac', 'Porsche', 'Ram', 'Renault',
   'Rimac', 'Saab', 'Scion', 'Shelby', 'Skoda', 'Subaru', 'Suzuki', 'Tesla', 'Toyota', 'Volkswagen', 'VW', 'Volvo', 'Tucker',
+  'Red Bull', 'Racing Bulls', 'AlphaTauri', 'Alpine', 'Williams', 'Haas', 'Sauber', 'Brabham', 'Tyrrell', 'Lola',
   'AMC', 'Rivian', 'Polestar', 'Genesis', 'Kia', 'Mack', 'Kenworth', 'Peterbilt', 'Freightliner', 'Harley-Davidson', 'Ducati', 'Kawasaki', 'Yamaha',
 ];
 const SORTED = [...BRANDS].sort((a, b) => b.length - a.length);
@@ -28,6 +29,7 @@ export const CATEGORIES = {
   european: { brands: ['Audi', 'BMW', 'Porsche', 'Mercedes-Benz', 'Volkswagen', 'Volvo', 'Fiat', 'Alfa Romeo', 'Renault', 'Peugeot', 'Citroen', 'Opel', 'Jaguar', 'Mini', 'Saab', 'Skoda', 'Lancia'], kw: [] },
   muscle: { brands: ['Ford', 'Chevrolet', 'Dodge', 'Plymouth', 'Pontiac', 'Buick', 'Oldsmobile', 'AMC', 'Mercury', 'Shelby'], kw: ['mustang', 'camaro', 'charger', 'challenger', 'chevelle', 'barracuda', 'gto', 'corvette'] },
   exotics: { brands: ['Lamborghini', 'Ferrari', 'McLaren', 'Bugatti', 'Koenigsegg', 'Pagani', 'Aston Martin', 'Lotus', 'Maserati', 'Rimac', 'Bentley', 'Rolls-Royce'], kw: ['hw exotics'] },
+  f1: { brands: ['Red Bull', 'Racing Bulls', 'AlphaTauri', 'Alpine', 'Williams', 'Haas', 'Sauber', 'Ferrari', 'McLaren', 'Mercedes-Benz', 'Aston Martin'], kw: ['formula 1', 'formula one', 'grand prix', 'f1 team'] },
   trucks: { brands: ['Jeep', 'Land Rover', 'Ram', 'GMC', 'Hummer', 'Mack', 'Kenworth', 'Peterbilt', 'Freightliner'], kw: ['truck', 'pickup', 'bronco', 'raptor', 'baja', 'off-road', '4x4', 'cruiser', 'hilux', 'silverado', 'f-150', 'monster'] },
   racing: { brands: [], kw: ['race', 'racing', 'livery', 'le mans', 'rally', 'nascar', 'drift', 'speed machines', 'gt3', 'gt40', 'imsa', 'hw race'] },
   fantasy: { brands: [], kw: ['twin mill', 'bone shaker', 'rodger dodger', 'sharkruiser', 'fantasy', 'whip creamer', 'deora', 'rip rod', 'gotta go'] },

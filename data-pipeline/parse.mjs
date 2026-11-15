@@ -55,7 +55,10 @@ export function parsePage(html, year) {
   const nodes = root.querySelectorAll('h2,h3,h4,table');
   for (const n of nodes) {
     const tag = n.tagName.toLowerCase();
-    if (tag !== 'table') { heading = clean(n.text).replace(/\[edit\]/i, '').trim(); continue; }
+    if (tag !== 'table') {
+      heading = clean(n.text).replace(/\[edit\]/i, '').replace(/\s*New for \d{4}!?\s*$/i, '').trim();
+      continue;
+    }
     const grid = tableGrid(n);
     const hi = grid.findIndex((r) => r.some((c) => c.th) && Object.keys(mapHeader(r)).length >= 2);
     if (hi < 0) continue;
@@ -65,7 +68,7 @@ export function parsePage(html, year) {
       const g = (k) => (map[k] === undefined ? '' : row[map[k]]?.text || '');
       const name = g('name');
       if (!name || /^(name|model)$/i.test(name)) continue;
-      const ser = g('ser') || heading;
+      const ser = (g('ser') || heading).replace(/\s*New for \d{4}!?\s*$/i, '').trim();
       const col = g('col');
       const toy = g('toy');
       const key = [name, toy, col, ser, g('num')].join('|');

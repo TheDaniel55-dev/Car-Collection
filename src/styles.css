@@ -112,6 +112,7 @@ nav button b{display:block;font-size:1.25rem;line-height:1.1}nav button.on{color
 .verdict{border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
 .verdict.has{background:color-mix(in srgb,var(--warn) 16%,transparent);color:var(--warn)}.verdict.other{background:color-mix(in srgb,#e69b00 20%,transparent);color:var(--tx)}
 .verdict .mini{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.g>.mini{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}.g>.mini .dot{width:14px;height:14px;border-width:1px}
 
 /* ---------- series rings / bars / stats ---------- */
 .ring{flex:none}.ring circle{fill:none;stroke-width:7}.ring .bg{stroke:var(--ln)}

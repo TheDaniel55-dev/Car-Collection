@@ -13,10 +13,12 @@ export function indexOwned(list) {
     (own.byKey.get(k) || own.byKey.set(k, []).get(k)).push(o);
     if (o.vid) (own.byVid.get(o.vid) || own.byVid.set(o.vid, []).get(o.vid)).push(o);
     const b = codeKey(o.snap.base);
-    if (b) own.byBase.set(b, k);
+    // Several different cars can carry the same code, so each code keeps a SET of castings.
+    const addBase = (code) => (own.byBase.get(code) || own.byBase.set(code, new Set()).get(code)).add(k);
+    if (b) addBase(b);
     // A card/toy code typed by hand (e.g. a Premium car missing from the catalogue) must also find the car again.
     const tc = codeKey(o.snap.toy);
-    if (tc.length >= 4 && !own.byBase.has(tc)) own.byBase.set(tc, k);
+    if (tc.length >= 4) addBase(tc);
     if (!cat.castings.has(k) && !own.extra.has(k)) {
       own.extra.set(k, { key: k, name: o.snap.name, n: norm(o.snap.name), brand: brandOf(o.snap.name), count: 0, y0: 9999, y1: 0, bases: new Set(b ? [b] : []), from: 'own' });
     }
@@ -32,8 +34,8 @@ export function castingsForCode(code) {
   const ck = codeKey(code);
   const keys = new Set();
   cat.byCode.get(ck)?.forEach((k) => keys.add(k));
-  if (cat.learned.has(ck)) keys.add(cat.learned.get(ck));
-  if (own.byBase.has(ck)) keys.add(own.byBase.get(ck));
+  cat.learned.get(ck)?.forEach((k) => keys.add(k));
+  own.byBase.get(ck)?.forEach((k) => keys.add(k));
   return [...keys];
 }
 
@@ -50,7 +52,7 @@ export function searchCastings(q, limit = 8) {
     for (const k of castingsForCode(ck)) bump(k, 100);
     if (/\d/.test(ck) && ck.length >= 3) {
       for (const code of cat.codeList) if (code.startsWith(ck) && code !== ck) for (const k of cat.byCode.get(code)) bump(k, 70);
-      for (const [code, k] of cat.learned) if (code.startsWith(ck) && code !== ck) bump(k, 70);
+      for (const [code, keys] of cat.learned) if (code.startsWith(ck) && code !== ck) for (const k of keys) bump(k, 70);
     }
   }
   const toks = tokensOf(q);
@@ -65,6 +67,9 @@ export function searchCastings(q, limit = 8) {
   }
   return [...out.values()].sort((a, b) => b.score - a.score || a.name.localeCompare(b.name)).slice(0, limit);
 }
+
+/** How many different cars carry this exact code (0 = code unknown). */
+export const sharedCode = (q) => castingsForCode(q).length;
 
 export const variantsOf = (key) => cat.byKey.get(key) || [];
 export const ownedOf = (key) => own.byKey.get(key) || [];
