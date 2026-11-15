@@ -9,6 +9,7 @@ import { own, searchCastings, matchOcr, ocrGuess, castingByKey, variantsOf, owne
 import { S, opt, addOwned, saveOwned, removeOwned, makeSnap, saveProfile, switchProfile, createProfile, deleteProfile } from './store.js';
 import { progress } from './series.js';
 import { rarityBreakdown, BASE_POINTS, TIER_COLORS, TIERS } from './rarity.js';
+import { addMissing } from './missing.js';
 import { readPhoto } from './photo.js';
 import { recognize } from './ocr.js';
 import { openSheet, setSheet, closeSheet, closeAllSheets, toast, confetti, flip, $, $$, buzz } from './ui.js';
@@ -33,7 +34,8 @@ const codeLike = (q) => (/\d/.test(q) && !/\s/.test(q.trim()) && q.trim().length
 function notFoundHTML() {
   const code = codeLike(A.q);
   return `<div class="card nf"><b>${esc(t('add.nf.title', { q: A.q.trim() }))}</b><p class="mu">${esc(t('add.nf.why'))}</p>
-  <button type="button" class="btn primary" data-act="add-manual">${esc(code ? t('add.nf.btnCode', { c: code }) : t('add.nf.btn'))}</button></div>`;
+  <button type="button" class="btn primary" data-act="add-manual">${esc(code ? t('add.nf.btnCode', { c: code }) : t('add.nf.btn'))}</button>
+  <button type="button" class="btn s" data-act="miss-report" data-q="${esc(A.q.trim())}">${esc(t('miss.report'))}</button></div>`;
 }
 
 function resultRows() {
@@ -221,6 +223,9 @@ function refreshDup() {
   box.innerHTML = `<div class="verdict ${v.level === 'red' ? 'has' : 'other'}"><strong>${esc(t('v.' + v.level + '.' + v.reason))}</strong>${v.cols.length ? `<div class="mini">${v.cols.map((c) => `${dot(c)} ${esc(cname(c))}`).join(' ')}</div>` : ''}
   ${v.level === 'red' ? `<label class="field chk"><input type="checkbox" data-ch="f-sep" ${A.sep ? 'checked' : ''}> <span>${esc(t('add.separate'))}</span></label>` : ''}</div>`;
 }
+acts['miss-report'] = async (el) => {
+  if (await addMissing(el.dataset.q, { where: el.dataset.where || '' })) { el.disabled = true; toast(t('miss.thanks')); }
+};
 ins['f-dup'] = refreshDup;
 chs['f-sep'] = (el) => { if (A) A.sep = el.checked; };
 ins['f-basefill'] = (el) => {

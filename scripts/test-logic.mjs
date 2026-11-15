@@ -158,5 +158,20 @@ await ok('brandOf reads F1 teams', () => {
   assert.equal(brandOf('Red Bull RB20'), 'Red Bull');
   assert.equal(brandOf('Ferrari SF-24'), 'Ferrari');
 });
+console.log('missing-from-database notes');
+await ok('missing list records a search, counts repeats and exports as text', async () => {
+  const M = await L('/src/missing.js');
+  await M.loadMissing();
+  await M.addMissing('ZZZ123', { where: 'check' });
+  await M.addMissing('Ferrari SF-24');
+  await M.addMissing('zzz123');
+  const l = M.missingList();
+  assert.equal(l.length, 2, 'the same query is not stored twice');
+  assert.equal(l[0].q, 'zzz123'); assert.equal(l[0].n, 2, 'repeat counted');
+  assert.ok(M.missingText().includes('Ferrari SF-24'));
+  assert.equal(await M.addMissing('   '), false, 'blank is ignored');
+  await M.clearMissing();
+  assert.equal(M.missingList().length, 0);
+});
 await server.close();
 console.log(process.exitCode ? 'FAILED' : `all ${n} logic tests passed`);

@@ -8,7 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 import { parsePage } from './parse.mjs';
-import { parseVersions, castingLinks, mergeRows } from './castings.mjs';
+import { parseVersions, castingLinks, parsePremiumPage, mergeRows } from './castings.mjs';
 import { progress, sleep, writeDataset, readRows } from './lib.mjs';
 
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
@@ -20,7 +20,9 @@ const MIN_KEEP = 0.7; // refuse to publish if fewer than 70% of the previous row
 // Phase 2 is the slow part (one page per casting, 1 req/s), so it has its own year floor.
 const CAST_FROM = Number(arg('castings-from', 2010));
 const NO_CAST = process.argv.includes('--no-castings');
-const EXTRA = JSON.parse(fs.readFileSync(new URL('./extra-pages.json', import.meta.url), 'utf8')).indexPages || [];
+const EXTRA_CFG = JSON.parse(fs.readFileSync(new URL('./extra-pages.json', import.meta.url), 'utf8'));
+const EXTRA = EXTRA_CFG.indexPages || [];
+const YEAR_INDEX = EXTRA_CFG.yearIndexPages || [];
 
 async function api(params, tries = 4) {
   const url = API + '?' + new URLSearchParams({ format: 'json', formatversion: '2', ...params });
@@ -73,9 +75,47 @@ async function discoverOtherLists() {
   } catch { /* report only */ }
 }
 
+/**
+ * Premium and themed lines (Car Culture, Boulevard, Pop Culture, RLC, Team Transport) are not in
+ * the yearly mainline lists. Their index pages link to one page per year, and those year pages do
+ * carry a Body Color column, so they are read directly as well as harvested for casting pages.
+ */
+async function crawlSeriesPages(failed) {
+  const rows = []; const castings = new Set();
+  if (!YEAR_INDEX.length) return { rows, castings };
+  const yearPages = new Map();
+  for (const idx of YEAR_INDEX) {
+    try {
+      const j = await api({ action: 'parse', page: idx, prop: 'text', disableeditsection: '1', redirects: '1' });
+      for (const t of castingLinks(j.parse?.text || '')) {
+        const m = /^(\d{4})\s+\S/.exec(t);
+        const y = m && Number(m[1]);
+        if (y && y >= CAST_FROM && y <= TO) yearPages.set(t, y);
+      }
+    } catch (e) { failed.push(`index ${idx}: ${e.message}`); }
+    await sleep(1000);
+  }
+  if (!yearPages.size) { console.log('No premium/themed year pages found.'); return { rows, castings }; }
+  const bar = progress('Premium & themed lines', yearPages.size);
+  for (const [page, y] of yearPages) {
+    try {
+      const j = await api({ action: 'parse', page, prop: 'text', disableeditsection: '1', redirects: '1' });
+      const html = j.parse?.text || '';
+      const got = parsePremiumPage(html, y, j.parse?.title || page);
+      rows.push(...got);
+      castingLinks(html).forEach((x) => { if (!/^\d{4}\s/.test(x)) castings.add(x); });
+      bar.tick(`${page.slice(0, 24)}: ${got.length}`);
+    } catch (e) { failed.push(`series ${page}: ${e.message}`); bar.tick('FAILED'); }
+    await sleep(1000);
+  }
+  bar.done();
+  console.log(`Premium & themed: ${rows.length} rows from ${yearPages.size} year pages`);
+  return { rows, castings };
+}
+
 /** Phase 2: read every casting page linked from the lists in range, plus the extra collection pages. */
-async function crawlCastings(listHtml, failed) {
-  const titles = new Set();
+async function crawlCastings(listHtml, failed, extraCastings = []) {
+  const titles = new Set(extraCastings);
   for (const html of listHtml) for (const x of castingLinks(html)) titles.add(x);
   for (const page of EXTRA) {
     try {
@@ -128,9 +168,11 @@ async function main() {
   }
   bar.done();
 
-  const castRows = NO_CAST ? [] : await crawlCastings(listHtml, failed);
+  const series = NO_CAST ? { rows: [], castings: new Set() } : await crawlSeriesPages(failed);
+  rows.push(...series.rows);
+  const castRows = NO_CAST ? [] : await crawlCastings(listHtml, failed, [...series.castings]);
   const merged = mergeRows(rows, castRows);
-  console.log(`Rows: ${rows.length} from the lists + ${castRows.length} from casting pages -> ${merged.length} after merging`);
+  console.log(`Rows: ${rows.length} from lists and themed lines + ${castRows.length} from casting pages -> ${merged.length} after merging`);
   // ---- health check: fail rather than publish broken data ----
   const realPrev = prev.manifest && !prev.manifest.seed ? prev.rows.length : 0;
   const problems = [];

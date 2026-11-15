@@ -35,7 +35,16 @@ on the wiki — add the useful ones to that file.
 
 ## 4. Casting codes (the code stamped under the car)
 
-The code on the base of a car, such as `GRX20`, does not exist anywhere on the wiki
-(searched with `insource:`, zero hits). It can only be learned from what gets typed into the app,
-so the app stores every code → car it is taught, and one code may belong to many cars.
-Nothing to fix here; this is a limit of the source.
+Correction to an earlier note here: the code **is** on the wiki. `insource:` search is disabled on
+this wiki, which made it look absent. A plain search for `GRX20` finds `'20 Toyota GR Supra`, where
+it is the **Toy #** of the car's first release — the row the wiki marks "New Model". The base tooling
+keeps that code for every later release, which is why one code can cover many cars.
+
+The pipeline now reads it that way: for each casting page, the debut row's toy number is written to
+the `base` field of every row of that casting. So typing the code off the base of a car should find
+it in the catalogue, not only among hand-added cars.
+
+Still worth checking after the next run: how often the "New Model" note is actually present, and
+whether the fallback (earliest year in the versions table) picks the right row. The short codes the
+wiki writes as "Base code(s): T01, T03" are the small date/production codes, not this one, and are
+not stored.

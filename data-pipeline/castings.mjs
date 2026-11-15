@@ -55,10 +55,60 @@ export function parseVersions(html, title) {
       // Team and driver are what tell two F1 cars of the same colour apart, so they ride
       // along in the decoration field, which the app already shows.
       const deco = [...new Set([g('team'), g('driver'), g('tp')].map(clean).filter(Boolean))].join(' · ');
+      const notes = g('notes');
       const id = `c-${slug(name)}-${codeKey(toy) || codeKey(`${y}${col}${ser}${deco}`).slice(0, 12)}`;
       if (seen.has(id)) continue;
       seen.add(id);
-      out.push([id, name, toy, col, ser, y, classifyType(`${ser} ${name} ${g('notes')}`), g('num'), '', deco, g('wh'), 0, g('made')]);
+      out.push([id, name, toy, col, ser, y, classifyType(`${ser} ${name} ${notes}`), g('num'), '', deco, g('wh'), 0, g('made'), notes]);
+    }
+  }
+  // The code stamped under the car is the toy number of the casting's FIRST release - the row
+  // the wiki marks "New Model". Every later release keeps it, because the base tooling is the
+  // same. That is the code people read off the car, so it goes on every row of this casting.
+  const debut = out.find((r) => /new\s*model/i.test(r[13] || '')) ||
+    out.filter((r) => r[5]).sort((a, b) => a[5] - b[5])[0];
+  const base = debut ? codeKey(debut[2]) : '';
+  for (const r of out) { r[8] = base; r.length = 13; }
+  return out;
+}
+
+const NUM = /^(col|collector|series)\.?\s*#|^#$|^no\.?$/i;
+const PREM = {
+  num: NUM,
+  toy: /toy\s*#|toy\s*no|^toy$|card\s*code/i,
+  name: /casting\s*name|^name$|^model|vehicle/i,
+  col: /colou?r/i,
+  wh: /wheel/i,
+  notes: /notes/i,
+};
+
+/**
+ * Premium/themed per-year pages ("2024 Car Culture", "2024 Hot Wheels Boulevard", ...).
+ * These do carry a Body Color column, and the series name comes from the nearest heading.
+ */
+export function parsePremiumPage(html, year, pageTitle = '') {
+  const root = parse(html);
+  const out = [];
+  const seen = new Set();
+  let heading = '';
+  for (const n of root.querySelectorAll('h2,h3,h4,table')) {
+    if (n.tagName.toLowerCase() !== 'table') { heading = clean(n.text).replace(/\[edit\]/i, '').trim(); continue; }
+    const grid = tableGrid(n);
+    // 'num' is tested before 'ser' on purpose: these tables head their number column "Series #".
+    const hi = grid.findIndex((r) => r.some((c) => c.th) && (() => { const m = {}; r.forEach((c, i) => { for (const [k, re] of Object.entries(PREM)) if (!(k in m) && re.test(c.text)) { m[k] = i; break; } }); return m.name !== undefined && m.col !== undefined; })());
+    if (hi < 0) continue;
+    const map = {};
+    grid[hi].forEach((c, i) => { for (const [k, re] of Object.entries(PREM)) if (!(k in map) && re.test(c.text)) { map[k] = i; break; } });
+    for (const row of grid.slice(hi + 1)) {
+      const g = (k) => (map[k] === undefined ? '' : clean(row[map[k]]?.text || ''));
+      const name = g('name');
+      if (!name || /casting\s*name/i.test(name)) continue;
+      const ser = heading.replace(/\s*\(\d{4}\)\s*$/, '') || clean(pageTitle);
+      const toy = g('toy');
+      const id = `p-${slug(pageTitle || ser)}-${codeKey(toy) || codeKey(`${name}${g('col')}`).slice(0, 12)}`;
+      if (seen.has(id)) continue;
+      seen.add(id);
+      out.push([id, name, toy, g('col'), ser, year, classifyType(`${ser} ${pageTitle} ${name} ${g('notes')}`), g('num'), '', '', g('wh'), 0, '']);
     }
   }
   return out;
