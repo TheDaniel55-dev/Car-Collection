@@ -7,7 +7,7 @@ const RULES = [
   [/red ?line club|\brlc\b/i, 'rlc'],
   [/convention|nationals|toy fair|\bhw ?fest|collectors? event/i, 'cv'],
   [/\berror\b|misprint/i, 'er'],
-  [/car culture|boulevard|premium|pop culture|team transport|elite 64|silver series|vintage racing|retro entertainment|hw rewards|speed machines|replica entertainment|id cars|fast & furious premium/i, 'p'],
+  [/car culture|boulevard|premium|pop culture|team transport|formula one collection|elite 64|silver series|vintage racing|retro entertainment|hw rewards|speed machines|replica entertainment|id cars|fast & furious premium/i, 'p'],
   [/exclusive|walmart|target|kroger|dollar general|mattel creations/i, 'ex'],
 ];
 export function classifyType(text) {

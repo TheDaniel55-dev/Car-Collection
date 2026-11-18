@@ -140,6 +140,8 @@
  "miss.copied": "Copiat",
  "miss.clear": "Golește lista",
  "miss.selectAll": "Selectează textul și copiază-l.",
+ "add.onCard": "de pe card",
+ "add.whyPick": "{c} e codul de sub mașină, comun la {n} versiuni ale acestui model. Alege-o pe cea din mână.",
  "add.sharedCode": "{n} mașini au acest cod — alege-o pe a ta",
  "chk.sharedCode": "{n} mașini au acest cod. ✓ = o ai deja în colecție.",
  "add.filterColour": "Filtrează după culoare",

@@ -6,7 +6,23 @@ import { tableGrid } from './parse.mjs';
 import { classifyType } from '../shared/classify.js';
 
 const clean = (s) => s.replace(/\[\d+\]|\[[a-z]\]/gi, '').replace(/\s+/g, ' ').trim();
+/**
+ * The wiki glues the position in the series onto the series name ("Track Aces1/5", "Formula 11/5").
+ * Left alone, the five cars of one series would each become a series of their own and the
+ * completion rings would never fill, so the position is split off.
+ */
+const splitSeries = (raw) => {
+  // Greedy on purpose: "Formula 11/5" is "Formula 1" + "1/5", not "Formula" + "11/5".
+  const m = /^(.*\S)\s*(\d{1,2}\s*\/\s*\d{1,3})$/.exec(clean(raw));
+  return m && m[1] ? { ser: m[1].trim(), pos: m[2].replace(/\s+/g, '') } : { ser: clean(raw), pos: '' };
+};
 const codeKey = (s) => String(s ?? '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+/** Short stable hash (FNV-1a), so ids stay the same between runs. */
+const h = (s) => {
+  let x = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 0x01000193) >>> 0; }
+  return x.toString(36).padStart(7, '0');
+};
 const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 42);
 
 // Header keywords. "Base Color/Type" is the colour of the metal base, NOT the casting code
@@ -50,16 +66,20 @@ export function parseVersions(html, title) {
       const y = Number((/\b(19|20)\d{2}\b/.exec(g('y')) || [])[0]) || 0;
       if (!col && !y) continue;
       if (/^colou?r$/i.test(col)) continue;     // a repeated header row
-      const ser = g('ser');
+      const { ser, pos } = splitSeries(g('ser'));
       const toy = g('toy');
       // Team and driver are what tell two F1 cars of the same colour apart, so they ride
       // along in the decoration field, which the app already shows.
       const deco = [...new Set([g('team'), g('driver'), g('tp')].map(clean).filter(Boolean))].join(' · ');
       const notes = g('notes');
-      const id = `c-${slug(name)}-${codeKey(toy) || codeKey(`${y}${col}${ser}${deco}`).slice(0, 12)}`;
+      // Several variants can share one toy number - a Formula One 5-pack carries a single code
+      // for every team inside it - so the id must also hold what tells them apart, or all but
+      // the first team of each pack would be dropped as a duplicate.
+      const mark = h(`${y}|${ser}|${col}|${deco}|${g('wh')}`);
+      const id = `c-${slug(name)}-${[codeKey(toy), mark].filter(Boolean).join('-')}`;
       if (seen.has(id)) continue;
       seen.add(id);
-      out.push([id, name, toy, col, ser, y, classifyType(`${ser} ${name} ${notes}`), g('num'), '', deco, g('wh'), 0, g('made'), notes]);
+      out.push([id, name, toy, col, ser, y, classifyType(`${ser} ${name} ${notes}`), g('num') || pos, '', deco, g('wh'), 0, g('made'), notes]);
     }
   }
   // The code stamped under the car is the toy number of the casting's FIRST release - the row
@@ -103,12 +123,12 @@ export function parsePremiumPage(html, year, pageTitle = '') {
       const g = (k) => (map[k] === undefined ? '' : clean(row[map[k]]?.text || ''));
       const name = g('name');
       if (!name || /casting\s*name/i.test(name)) continue;
-      const ser = heading.replace(/\s*\(\d{4}\)\s*$/, '') || clean(pageTitle);
+      const { ser, pos } = splitSeries(heading.replace(/\s*\(\d{4}\)\s*$/, '') || clean(pageTitle));
       const toy = g('toy');
-      const id = `p-${slug(pageTitle || ser)}-${codeKey(toy) || codeKey(`${name}${g('col')}`).slice(0, 12)}`;
+      const id = `p-${slug(pageTitle || ser)}-${[codeKey(toy), h(`${name}|${g('col')}|${ser}`)].filter(Boolean).join('-')}`;
       if (seen.has(id)) continue;
       seen.add(id);
-      out.push([id, name, toy, g('col'), ser, year, classifyType(`${ser} ${pageTitle} ${name} ${g('notes')}`), g('num'), '', '', g('wh'), 0, '']);
+      out.push([id, name, toy, g('col'), ser, year, classifyType(`${ser} ${pageTitle} ${name} ${g('notes')}`), g('num') || pos, '', '', g('wh'), 0, '']);
     }
   }
   return out;

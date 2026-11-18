@@ -140,6 +140,8 @@
  "miss.copied": "Copied",
  "miss.clear": "Clear the list",
  "miss.selectAll": "Select the text and copy it.",
+ "add.onCard": "on the card",
+ "add.whyPick": "{c} is the code under the car, shared by {n} versions of this model. Pick the one you are holding.",
  "add.sharedCode": "{n} cars carry this code — pick yours",
  "chk.sharedCode": "{n} cars carry this code. ✓ = already in your collection.",
  "add.filterColour": "Filter by colour",

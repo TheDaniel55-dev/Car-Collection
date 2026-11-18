@@ -106,21 +106,38 @@ function pickCasting(key) {
     const o = ownedOf(key)[0];
     return startForm({ name: c.name, base: o?.snap.base || '', toy: o?.snap.toy || '', made: o?.snap.made || '', cy: o?.snap.cy || 0, cf: A.cf }, { manual: true });
   }
+  // Nothing to choose between: go straight to the form. A card code that matches exactly one
+  // release also goes straight through - that code names one car, so asking would be pointless.
+  const exact = exactToyMatches(vs);
+  const only = vs.length === 1 ? vs[0] : (exact.length === 1 && vs.length > 1 && !sharesTypedBase(vs) ? exact[0] : null);
+  if (only) return openVariant(only);
   A.step = 'variants';
   setSheet(variantsHTML());
 }
 
+/** Variants whose card code is exactly what was typed or scanned. */
+function exactToyMatches(vs) {
+  const q = codeKey(A.q || '');
+  return q.length >= 4 ? vs.filter((v) => codeKey(v.toy) === q) : [];
+}
+/** True when the typed code is also the casting code shared by this casting's releases. */
+function sharesTypedBase(vs) {
+  const q = codeKey(A.q || '');
+  return !!q && vs.some((v) => codeKey(v.base) === q);
+}
+
 function variantsHTML() {
   const c = A.casting;
-  const vs = variantsOf(A.key).slice().sort((a, b) => (b.cf === A.cf && A.cf ? 1 : 0) - (a.cf === A.cf && A.cf ? 1 : 0) || b.y - a.y);
+  const exact = new Set(exactToyMatches(variantsOf(A.key)).map((v) => v.id));
+  const vs = variantsOf(A.key).slice().sort((a, b) => (exact.has(b.id) ? 1 : 0) - (exact.has(a.id) ? 1 : 0) || (b.cf === A.cf && A.cf ? 1 : 0) - (a.cf === A.cf && A.cf ? 1 : 0) || b.y - a.y);
   const shown = vs.slice(0, 80);
   const rows = shown.map((v) => {
     const n = (own.byVid.get(v.id) || []).reduce((a, o) => a + o.qty, 0);
     const title = [v.y || '', v.ser].filter(Boolean).join(' · ') || v.name;
-    return `<button type="button" class="card row it ${A.cf && v.cf === A.cf ? 'hl' : ''}" data-act="add-variant" data-id="${esc(v.id)}">${dot(v.cf, 'lg')}<span class="g"><b>${esc(title)}</b><span class="mu">${esc([v.col || t('add.colourUnknown'), v.cn, v.tp, typeLabel(v.ty)].filter(Boolean).join(' · '))}</span></span>${v.toy ? `<span class="chip mono">${esc(v.toy)}</span>` : ''}${n ? `<span class="chip ok">✓ ×${n}</span>` : ''}</button>`;
+    return `<button type="button" class="card row it ${exact.has(v.id) || (A.cf && v.cf === A.cf) ? 'hl' : ''}" data-act="add-variant" data-id="${esc(v.id)}">${dot(v.cf, 'lg')}<span class="g"><b>${esc(title)}</b><span class="mu">${esc([v.col || t('add.colourUnknown'), v.cn, v.tp, typeLabel(v.ty)].filter(Boolean).join(' · '))}</span></span>${exact.has(v.id) ? `<span class="chip ok">${esc(t('add.onCard'))}</span>` : ''}${v.toy ? `<span class="chip mono">${esc(v.toy)}</span>` : ''}${n ? `<span class="chip ok">✓ ×${n}</span>` : ''}</button>`;
   }).join('');
   return `<button type="button" class="link" data-act="add-back">‹ ${esc(t('back'))}</button>
-  <p class="stepl">${esc(t('add.s2'))}</p><h2>${esc(c.name)}</h2><p class="mu">${esc(t('add.pickVariant', { n: vs.length }))}</p>
+  <p class="stepl">${esc(t('add.s2'))}</p><h2>${esc(c.name)}</h2><p class="mu">${esc(sharesTypedBase(variantsOf(A.key)) ? t('add.whyPick', { c: codeKey(A.q), n: vs.length }) : t('add.pickVariant', { n: vs.length }))}</p>
   <div class="fieldlab">${esc(t('add.filterColour'))}${A.cf ? ` · ${esc(cname(A.cf))}` : ''}</div>${palettePicker(A.cf, 'add-vcf', t('add.filterColour'))}
   <div class="stack">${rows}</div>${vs.length > 80 ? `<p class="mu">${esc(t('add.more', { n: vs.length - 80 }))}</p>` : ''}
   <button type="button" class="btn s" data-act="add-notlisted">${esc(t('add.notListed'))}</button>`;
@@ -138,10 +155,13 @@ acts['add-manual'] = () => {
 };
 const ocrChips = () => `<p class="mu small">${esc(t('add.ocrRead'))}</p><div class="chips wrapc">${A.names.map((n) => `<button type="button" class="pl" data-act="f-usetext" data-name="${esc(n)}">${esc(n)}</button>`).join('')}</div>`;
 acts['f-usetext'] = (el) => { const f = $('#f-name'); if (f) { f.value = el.dataset.name; refreshDup(); } };
-acts['add-variant'] = (el) => {
-  const v = cat.byId.get(el.dataset.id); if (!v) return;
+function openVariant(v) {
   // The colour is picked by the user (the catalogue colour is only shown as a hint).
   startForm({ name: v.name, col: '', cf: A.cf || '', wikiCol: v.col || '', ser: v.ser, y: v.y, cy: v.cy, toy: v.toy, base: v.base, num: v.num, ty: v.ty, tp: v.tp, wh: v.wh, made: v.made, alt: v.cn }, { vid: v.id });
+}
+acts['add-variant'] = (el) => {
+  const v = cat.byId.get(el.dataset.id); if (!v) return;
+  openVariant(v);
 };
 
 /* ---------- details / manual form ---------- */

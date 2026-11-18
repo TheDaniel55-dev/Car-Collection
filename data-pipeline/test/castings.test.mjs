@@ -85,3 +85,39 @@ console.log('casting-page fixtures OK (headers copied from the live wiki, 15 Nov
   assert.equal(out[1][1], 'Only In The List', 'rows with no casting page are never dropped');
 }
 console.log('merge OK');
+
+// A Formula One 5-pack carries ONE toy number for every team inside it. Each team is still
+// its own variant, so none of them may be dropped. (Regression: only McLaren survived.)
+{
+  const pack = `<table class="wikitable"><tr><th>Col #</th><th>Year</th><th>Series</th><th>Team Represented</th><th>Color</th><th>Tampo</th><th>Wheel Type</th><th>Toy #</th><th>Country</th><th>Notes</th></tr>
+  <tr><td></td><td>2025</td><td>Formula One 5-Pack</td><td>McLaren Formula 1 Team</td><td>Anthracite</td><td>McLaren livery</td><td>Orange chrome AeroDisc</td><td>JBJ78JGF58</td><td>Indonesia</td><td></td></tr>
+  <tr><td></td><td>2025</td><td>Formula One 5-Pack</td><td>BWT Alpine F1 Team</td><td>Matte black</td><td>Alpine livery</td><td>Blue chrome AeroDisc</td><td>JBJ78JGF58</td><td>Indonesia</td><td></td></tr>
+  <tr><td></td><td>2025</td><td>Formula One 5-Pack</td><td>MoneyGram Haas F1 Team</td><td>Matte black</td><td>Haas livery</td><td>White AeroDisc</td><td>JBJ78JGF58</td><td>Indonesia</td><td></td></tr>
+  <tr><td>059/250</td><td>2025</td><td>Track Aces1/5</td><td>Oracle Red Bull Racing</td><td>Night Sky</td><td>Red Bull livery</td><td>Yellow AeroDisc</td><td>HYW10</td><td>Malaysia</td><td>New Model</td></tr></table>`;
+  const r = parseVersions(pack, 'Formula 1').map(o);
+  assert.equal(r.length, 4, `all four teams must survive, got ${r.length}`);
+  const teams = r.map((x) => x.tp.split(' · ')[0]).sort();
+  assert.deepEqual(teams, ['BWT Alpine F1 Team', 'McLaren Formula 1 Team', 'MoneyGram Haas F1 Team', 'Oracle Red Bull Racing']);
+  assert.equal(new Set(r.map((x) => x.id)).size, 4, 'ids must be distinct even on a shared toy number');
+  // two teams share a colour AND a toy number, and still stay apart
+  const matte = r.filter((x) => x.col === 'Matte black');
+  assert.equal(matte.length, 2);
+  assert.notEqual(matte[0].id, matte[1].id);
+}
+console.log('5-pack regression OK');
+
+// The wiki writes the series and the position in one cell ("Track Aces1/5"). Series completion
+// groups by series name, so the position must be split off or each car becomes its own series.
+{
+  const t = `<table class="wikitable"><tr><th>Col #</th><th>Year</th><th>Series</th><th>Color</th><th>Toy #</th></tr>
+  <tr><td>020/250</td><td>2026</td><td>Formula 11/5</td><td>Anthracite</td><td>JJH95</td></tr>
+  <tr><td></td><td>2025</td><td>Track Aces1/5</td><td>Night Sky</td><td>HYW10</td></tr>
+  <tr><td></td><td>2025</td><td>Formula One 5-Pack</td><td>Blue</td><td>JBJ78</td></tr></table>`;
+  const r = parseVersions(t, 'Formula 1').map(o);
+  assert.equal(r[0].ser, 'Formula 1', `series name cleaned, got "${r[0].ser}"`);
+  assert.equal(r[0].num, '020/250', 'a real collector number is not overwritten');
+  assert.equal(r[1].ser, 'Track Aces');
+  assert.equal(r[1].num, '1/5', 'with no collector number, the position is used');
+  assert.equal(r[2].ser, 'Formula One 5-Pack', 'a name ending in a word is left alone');
+}
+console.log('series/position split OK');

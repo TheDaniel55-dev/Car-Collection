@@ -42,6 +42,8 @@ for k,e,r in [('miss.report','Report it as missing','Raportează că lipsește')
  ('miss.copied','Copied','Copiat'),
  ('miss.clear','Clear the list','Golește lista'),
  ('miss.selectAll','Select the text and copy it.','Selectează textul și copiază-l.')]: a(k,e,r)
+a('add.onCard','on the card','de pe card')
+a('add.whyPick','{c} is the code under the car, shared by {n} versions of this model. Pick the one you are holding.','{c} e codul de sub mașină, comun la {n} versiuni ale acestui model. Alege-o pe cea din mână.')
 a('add.sharedCode','{n} cars carry this code — pick yours','{n} mașini au acest cod — alege-o pe a ta')
 a('chk.sharedCode','{n} cars carry this code. ✓ = already in your collection.','{n} mașini au acest cod. ✓ = o ai deja în colecție.')
 a('add.filterColour','Filter by colour','Filtrează după culoare'); a('add.colourDetected','Detected colour: {c}','Culoare detectată: {c}')
