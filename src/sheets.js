@@ -189,7 +189,13 @@ function formHTML() {
   const basics = `<div class="grid2">${field('f-qty', t('f.qty'), rec?.qty || 1, 'type="number" min="1" inputmode="numeric"')}${opt('carded') ? `<label class="field"><span>${esc(t('f.status'))}</span><select id="f-st"><option value="loose" ${rec?.st !== 'carded' ? 'selected' : ''}>${esc(t('loose'))}</option><option value="carded" ${rec?.st === 'carded' ? 'selected' : ''}>${esc(t('carded'))}</option></select></label>` : '<span></span>'}</div>`;
   const photo = `<div class="row wrap"><label class="btn s file">📷 ${esc(t('f.photo'))}<input type="file" accept="image/*" class="vh" data-ch="f-photo"></label>${(rec?.photo || A.photo) ? `<img id="f-prev" class="preview sm" src="${rec?.photo && !A.photo ? rec.photo : A.photo}" alt="">` : '<img id="f-prev" class="preview sm" alt="" hidden>'}</div>`;
   // 4) the rest, folded away
-  const moreCar = locked ? (!d.base ? field('f-base', t('f.baseLearn'), '', 'class="mono" autocapitalize="characters"') : '')
+  const ro = (lbl, v) => (String(v ?? '').trim() ? `<dt>${esc(lbl)}</dt><dd>${esc(String(v))}</dd>` : '');
+  // From the catalogue: shown so they can be checked, not edited. Editing is for cars added by
+  // hand and for the edit screen of a car already in the collection.
+  const moreCar = locked
+    ? `<dl class="kv">${ro(t('f.series'), d.ser)}${ro(t('f.num'), d.num)}${ro(t('f.year'), d.y || '')}${ro(t('f.castYear'), d.cy || '')}${ro(t('type'), d.ty ? typeLabel(d.ty) : '')}${ro(t('f.toy'), d.toy)}${ro(t('f.base'), d.base)}${ro(t('f.made'), d.made)}${ro(t('cmp.wheels'), d.wh)}${ro(t('cmp.deco'), d.tp)}</dl>
+       <p class="mu small">${esc(t('add.fromCatalogue'))}</p>
+       ${!d.base ? field('f-base', t('f.baseLearn'), '', 'class="mono" autocapitalize="characters"') : ''}`
     : `<div class="grid2">${field('f-ser', t('f.series'), d.ser, 'data-in="f-dup"')}${field('f-y', t('f.year'), d.y || '', 'inputmode="numeric"')}</div>
        <div class="grid2">${field('f-cy', t('f.castYear'), d.cy || '', 'inputmode="numeric"')}${field('f-made', t('f.made'), d.made, 'list="countries"')}</div>
        <label class="field"><span>${esc(t('type'))}</span><select id="f-ty"><option value="">${esc(t('f.typeAuto'))}</option>${['m', 'ex', 'p', 'th', 'sth', 'cv', 'rlc', 'er'].map((k) => `<option value="${k}" ${d.ty === k ? 'selected' : ''}>${esc(t('type.' + k))}</option>`).join('')}</select></label>

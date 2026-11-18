@@ -103,7 +103,7 @@ export function makeSnap(src) {
     name, key: castKey(name), col, cf: src.cf || colorFamily(col),
     ser: String(src.ser || '').trim(), y: Number(src.y) || 0, cy: Number(src.cy) || 0,
     toy: codeKey(src.toy), base: codeKey(src.base), num: String(src.num || '').trim(),
-    ty: src.ty || classifyType(src.ser), made: String(src.made || '').trim(),
+    ty: src.ty || classifyType(src.ser, src.wh), made: String(src.made || '').trim(),
     tp: String(src.tp || '').trim(), wh: String(src.wh || '').trim(), alt: String(src.alt || '').trim(),
   };
 }

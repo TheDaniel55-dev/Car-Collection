@@ -79,7 +79,7 @@ export function parseVersions(html, title) {
       const id = `c-${slug(name)}-${[codeKey(toy), mark].filter(Boolean).join('-')}`;
       if (seen.has(id)) continue;
       seen.add(id);
-      out.push([id, name, toy, col, ser, y, classifyType(`${ser} ${name} ${notes}`), g('num') || pos, '', deco, g('wh'), 0, g('made'), notes]);
+      out.push([id, name, toy, col, ser, y, classifyType(`${ser} ${name} ${notes}`, g('wh')), g('num') || pos, '', deco, g('wh'), 0, g('made'), notes]);
     }
   }
   // The code stamped under the car is the toy number of the casting's FIRST release - the row
@@ -128,7 +128,7 @@ export function parsePremiumPage(html, year, pageTitle = '') {
       const id = `p-${slug(pageTitle || ser)}-${[codeKey(toy), h(`${name}|${g('col')}|${ser}`)].filter(Boolean).join('-')}`;
       if (seen.has(id)) continue;
       seen.add(id);
-      out.push([id, name, toy, g('col'), ser, year, classifyType(`${ser} ${pageTitle} ${name} ${g('notes')}`), g('num') || pos, '', '', g('wh'), 0, '']);
+      out.push([id, name, toy, g('col'), ser, year, classifyType(`${ser} ${pageTitle} ${name} ${g('notes')}`, g('wh')), g('num') || pos, '', '', g('wh'), 0, '']);
     }
   }
   return out;

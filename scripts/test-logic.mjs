@@ -11,7 +11,8 @@ let n = 0; const ok = (name, fn) => Promise.resolve().then(fn).then(() => { n++;
 const { castKey, codeKey, levenshtein } = await L('/shared/text.js');
 const { colorFamily } = await L('/shared/colors.js');
 const { brandOf } = await L('/shared/brands.js');
-const { classifyType } = await L('/shared/classify.js');
+const cls = await L('/shared/classify.js');
+const { classifyType } = cls;
 const { rarityBreakdown, tierOf } = await L('/src/rarity.js');
 const { encryptJSON, decryptJSON } = await L('/src/crypto.js');
 const cat = (await L('/src/catalogue.js'));
@@ -172,6 +173,45 @@ await ok('missing list records a search, counts repeats and exports as text', as
   assert.equal(await M.addMissing('   '), false, 'blank is ignored');
   await M.clearMissing();
   assert.equal(M.missingList().length, 0);
+});
+console.log('matching hand-added cars to the catalogue');
+await ok('proposes a match only when one catalogue entry fits, and fills only the gaps', async () => {
+  const R = await L('/src/rematch.js');
+  const { makeSnap } = await L('/src/store.js');
+  cat.indexCatalogue([
+    ['v1', 'Nissan Skyline GT-R (R34)', 'HKC80', 'Bayside Blue', 'Car Culture: Modern Classics', 2024, 'p', '1/5', 'HKC80', '', 'RRLW5', 1999, 'Malaysia'],
+    ['v2', 'Nissan Skyline GT-R (R34)', 'HXY11', 'Black', 'HW Turbo', 2023, 'm', '7/10', 'HKC80', '', '10SP', 1999, 'Thailand'],
+  ].map(cat.rowToVariant));
+  cat.cat.ready = true;   // loadCatalogue sets this in the app; the tests index directly
+  await R.loadRematch();
+  // added by hand with the colour he saw and the code off the base, nothing else
+  const byHand = { id: 'h1', vid: null, qty: 1, prod: '', snap: makeSnap({ name: 'Nissan Skyline GT-R (R34)', col: 'Bayside Blue', base: 'HKC80' }) };
+  S.indexOwned([byHand]);
+  const p = R.proposals();
+  assert.equal(p.length, 1, 'colour narrows two catalogue rows down to one');
+  assert.equal(p[0].variant.id, 'v1');
+  assert.equal(p[0].adds.ser, 'Car Culture: Modern Classics');
+  assert.equal(p[0].adds.ty, 'p', 'the line is corrected from the catalogue');
+  assert.equal(p[0].adds.name, undefined, 'never rewrites the name');
+  assert.equal(p[0].adds.col, undefined, 'never rewrites the colour he recorded');
+  await R.applyProposal(p[0]);
+  assert.equal(byHand.vid, 'v1');
+  assert.equal(byHand.snap.ser, 'Car Culture: Modern Classics');
+  assert.equal(R.proposals().length, 0, 'not offered twice');
+});
+await ok('stays quiet when the match is ambiguous', async () => {
+  const R = await L('/src/rematch.js');
+  const { makeSnap } = await L('/src/store.js');
+  await R.loadRematch();
+  // no colour recorded, so both catalogue rows remain possible
+  S.indexOwned([{ id: 'h2', vid: null, qty: 1, prod: '', snap: makeSnap({ name: 'Nissan Skyline GT-R (R34)', base: 'HKC80' }) }]);
+  assert.equal(R.proposals().length, 0, 'two candidates must not produce a guess');
+});
+await ok('Real Riders wheels mark a car as premium when the series name says nothing', () => {
+  const { classifyType } = cls;
+  assert.equal(classifyType('', 'RRLW5'), 'p');
+  assert.equal(classifyType('', '10SP'), 'm');
+  assert.ok(rarityBreakdown({ ty: classifyType('', 'RRLW5'), y: 2024 }).score > rarityBreakdown({ ty: classifyType('', '10SP'), y: 2024 }).score);
 });
 await server.close();
 console.log(process.exitCode ? 'FAILED' : `all ${n} logic tests passed`);

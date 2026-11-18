@@ -42,6 +42,19 @@ for k,e,r in [('miss.report','Report it as missing','Raportează că lipsește')
  ('miss.copied','Copied','Copiat'),
  ('miss.clear','Clear the list','Golește lista'),
  ('miss.selectAll','Select the text and copy it.','Selectează textul și copiază-l.')]: a(k,e,r)
+for k,e,r in [
+ ('add.fromCatalogue','Filled in from the database. Edit the car after adding if something is wrong.','Completate din baza de date. Dacă e ceva greșit, editezi mașina după ce o adaugi.'),
+ ('rm.title','Match cars to the database','Potrivește mașinile cu baza de date'),
+ ('rm.help','{n} cars you added by hand now exist in the database. Updating fills in the series, the line and the year.','{n} mașini adăugate de tine manual există acum în baza de date. Actualizarea le completează seria, categoria și anul.'),
+ ('rm.settingsHelp','Checks the cars you added by hand against the database and fills in what was missing.','Verifică mașinile adăugate manual cu baza de date și completează ce lipsea.'),
+ ('rm.run','Update cars','Actualizează mașinile'),
+ ('rm.apply','Update','Actualizează'),
+ ('rm.applyAll','Update all','Actualizează-le pe toate'),
+ ('rm.skip','Leave this one','Las-o așa'),
+ ('rm.later','Not now','Nu acum'),
+ ('rm.none','Nothing to update.','Nu e nimic de actualizat.'),
+ ('rm.done','Updated','Actualizat'),
+ ('rm.appliedN','{n} cars updated','{n} mașini actualizate')]: a(k,e,r)
 a('add.onCard','on the card','de pe card')
 a('add.whyPick','{c} is the code under the car, shared by {n} versions of this model. Pick the one you are holding.','{c} e codul de sub mașină, comun la {n} versiuni ale acestui model. Alege-o pe cea din mână.')
 a('add.sharedCode','{n} cars carry this code — pick yours','{n} mașini au acest cod — alege-o pe a ta')

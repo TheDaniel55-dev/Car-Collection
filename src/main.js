@@ -14,10 +14,11 @@ import { t, setLang } from './i18n.js';
 import { initStore, S, isDark } from './store.js';
 import { loadCatalogue, syncCatalogue, cat } from './catalogue.js';
 import { loadMissing } from './missing.js';
+import { loadRematch, proposals, seenVersion } from './rematch.js';
 import { acts, ins, chs, hooks } from './registry.js';
 import { maybeShowNews, markNewsSeen } from './news.js';
 import { toastAction, toast, $, $$, closeSheet, sheetOpen } from './ui.js';
-import { VIEWS, refreshStorage } from './views.js';
+import { VIEWS, refreshStorage, openRematch } from './views.js';
 import { openOnboarding } from './sheets.js';
 import { hashPin } from './crypto.js';
 
@@ -143,6 +144,20 @@ hooks.checkUpdate = async ({ force = false } = {}) => {
   return 'applying';
 };
 
+/**
+ * After a database update, hand-added cars may now exist in the catalogue. Offer the matches
+ * once per catalogue version, so it does not ask again on every launch.
+ */
+async function maybeOfferRematch() {
+  try {
+    if (sheetOpen?.()) return;
+    const version = cat.manifest?.version ?? 0;
+    if (version && (await seenVersion()) === version) return;
+    if (!proposals().length) return;
+    openRematch();
+  } catch { /* never block the app over this */ }
+}
+
 async function boot() {
   try {
     await initStore();
@@ -151,13 +166,15 @@ async function boot() {
     render();
     await loadCatalogue();
     await loadMissing();
+    await loadRematch();
     render();
     navigator.storage?.persist?.().catch(() => {});
     refreshStorage();
     const first = cat.list.length === 0;
     registerSW();
     installDatabase(first).catch(() => { $('#boot').hidden = true; });
-    if (!S.profile.onboarded && !S.locked) { markNewsSeen(); setTimeout(openOnboarding, 500); } else if (!S.locked) setTimeout(maybeShowNews, 900);
+    if (!S.profile.onboarded && !S.locked) { markNewsSeen(); setTimeout(openOnboarding, 500); }
+    else if (!S.locked) { setTimeout(maybeShowNews, 900); setTimeout(maybeOfferRematch, 1600); }
   } catch (e) {
     $('#view').innerHTML = `<div class="card"><h2>${t('err.storage')}</h2><p class="mu">${String(e?.message || e)}</p></div>`;
   }

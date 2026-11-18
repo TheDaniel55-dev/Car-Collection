@@ -9,6 +9,7 @@ import { S, opt, saveProfile, wipeCollection } from './store.js';
 import { progress, seriesGroups } from './series.js';
 import { rarityBreakdown, TIER_COLORS } from './rarity.js';
 import { missingList, missingText, clearMissing } from './missing.js';
+import { proposals, applyProposal, skipProposal, skipAll, markSeen } from './rematch.js';
 import { readPhoto } from './photo.js';
 import { recognize } from './ocr.js';
 import { exportEncrypted, buildBackup, toCSV, saveFile, parseBackup, restore } from './backup.js';
@@ -244,6 +245,48 @@ acts['chk-add'] = () => {
   const found = searchCastings(S.chk.q, 5); const pick = found.find((x) => x.key === S.chk.pick) || found[0];
   openAdd({ key: pick?.key, cf: S.chk.cf, q: S.chk.q });
 };
+/* ---------- matching hand-added cars to the catalogue ---------- */
+let rmList = [];
+const FIELD_LABEL = { ser: 'f.series', num: 'f.num', tp: 'cmp.deco', wh: 'cmp.wheels', made: 'f.made', toy: 'f.toy', base: 'f.base', y: 'f.year', cy: 'f.castYear', ty: 'type', alt: 'f.colourName' };
+
+export function rematchHTML() {
+  if (!rmList.length) return `<h2>${esc(t('rm.title'))}</h2><p class="mu">${esc(t('rm.none'))}</p><button type="button" class="btn s" data-act="sheet-close">${esc(t('close'))}</button>`;
+  const rows = rmList.map((p, i) => {
+    const what = Object.entries(p.adds).map(([k, v]) => `${t(FIELD_LABEL[k] || k)}: ${k === 'ty' ? typeLabel(v) : v}`).join(' · ');
+    return `<div class="card"><b>${esc(p.rec.snap.name)}</b><p class="mu">${esc(what)}</p>
+      <div class="row wrap"><button type="button" class="btn s" data-act="rm-one" data-i="${i}">${esc(t('rm.apply'))}</button><button type="button" class="btn s" data-act="rm-skip" data-i="${i}">${esc(t('rm.skip'))}</button></div></div>`;
+  }).join('');
+  return `<h2>${esc(t('rm.title'))}</h2><p class="mu">${esc(t('rm.help', { n: rmList.length }))}</p><div class="stack">${rows}</div>
+    <div class="row wrap"><button type="button" class="btn primary" data-act="rm-all">${esc(t('rm.applyAll'))}</button><button type="button" class="btn s" data-act="rm-later">${esc(t('rm.later'))}</button></div>`;
+}
+
+export function openRematch() { rmList = proposals(); openSheet(rematchHTML()); }
+
+acts['rematch-run'] = () => {
+  rmList = proposals();
+  if (!rmList.length) return toast(t('rm.none'));
+  openSheet(rematchHTML());
+};
+acts['rm-one'] = async (el) => {
+  const p = rmList[Number(el.dataset.i)]; if (!p) return;
+  await applyProposal(p);
+  rmList = proposals(); hooks.refresh();
+  if (rmList.length) setSheet(rematchHTML()); else { await markSeen(); closeSheet(); toast(t('rm.done')); }
+};
+acts['rm-skip'] = async (el) => {
+  const p = rmList[Number(el.dataset.i)]; if (!p) return;
+  await skipProposal(p.rec.id);
+  rmList = proposals();
+  if (rmList.length) setSheet(rematchHTML()); else { await markSeen(); closeSheet(); }
+};
+acts['rm-all'] = async () => {
+  const list = rmList.slice();
+  for (const p of list) await applyProposal(p);
+  await markSeen();
+  rmList = proposals(); hooks.refresh(); closeSheet(); toast(t('rm.appliedN', { n: list.length }));
+};
+acts['rm-later'] = async () => { await skipAll(rmList.map((p) => p.rec.id)); await markSeen(); closeSheet(); };
+
 acts['miss-copy'] = async () => {
   const text = missingText();
   try { await navigator.clipboard.writeText(text); toast(t('miss.copied')); }
@@ -396,6 +439,8 @@ export function settingsHTML() {
     <div class="row wrap"><label class="btn s file">${esc(t('bk.import'))}<input type="file" accept=".json,application/json,text/plain" class="vh" data-ch="bk-file"></label><button type="button" class="btn s" data-act="bk-paste">${esc(t('bk.paste'))}</button></div></div>
   <div class="card"><h3>${esc(t('set.pin'))}</h3><p class="mu">${esc(t('pin.help'))}</p><div class="row wrap"><button type="button" class="btn s" data-act="pin-set">${esc(p.pin ? t('pin.change') : t('pin.set'))}</button>${p.pin ? `<button type="button" class="btn s" data-act="pin-off">${esc(t('pin.off'))}</button>` : ''}</div></div>
   <button type="button" class="btn s" data-act="open-about">${esc(t('about.title'))}</button>
+  <div class="card"><h3>${esc(t('rm.title'))}</h3><p class="mu">${esc(t('rm.settingsHelp'))}</p>
+    <button type="button" class="btn s" data-act="rematch-run">${esc(t('rm.run'))}</button></div>
   ${missingList().length ? `<div class="card"><h3>${esc(t('miss.title'))}</h3><p class="mu">${esc(t('miss.help', { n: missingList().length }))}</p>
     <div class="row wrap"><button type="button" class="btn s" data-act="miss-copy">${esc(t('miss.copy'))}</button><button type="button" class="btn s" data-act="miss-clear">${esc(t('miss.clear'))}</button></div>
     <p class="mu small">${esc(missingList().slice(0, 8).map((x) => x.q).join(' · '))}</p></div>` : ''}
