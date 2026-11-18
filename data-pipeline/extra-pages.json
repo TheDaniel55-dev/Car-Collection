@@ -1,15 +1,8 @@
 {
-  "_comment": "Pages that the yearly 'List of YYYY Hot Wheels' lists do not cover. indexPages link straight to casting pages; yearIndexPages link to one page per year (those are read for their own tables too). See docs/TODO.md.",
+  "_comment": "Series pages are discovered automatically from Category:Hot Wheels by Series. This list is only a safety net for pages that category might miss.",
   "indexPages": [
     "2025 Formula One Collection",
     "2026 Formula One Collection",
     "2027 Formula One Collection"
-  ],
-  "yearIndexPages": [
-    "Car Culture",
-    "Car Culture: Team Transport",
-    "Hot Wheels Boulevard",
-    "Pop Culture",
-    "Red Line Club"
   ]
 }

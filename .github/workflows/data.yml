@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       castings_from:
-        description: 'Read casting pages (the only source of colours) from this year onwards. 2010 takes ~30 min, 1968 takes ~2 h.'
+        description: 'Read series and casting pages (the only source of colours) from this year onwards. 2010 takes about 1.5-2 h, 1968 takes longer.'
         default: '2010'
         required: true
 permissions:

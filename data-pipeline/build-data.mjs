@@ -22,7 +22,6 @@ const CAST_FROM = Number(arg('castings-from', 2010));
 const NO_CAST = process.argv.includes('--no-castings');
 const EXTRA_CFG = JSON.parse(fs.readFileSync(new URL('./extra-pages.json', import.meta.url), 'utf8'));
 const EXTRA = EXTRA_CFG.indexPages || [];
-const YEAR_INDEX = EXTRA_CFG.yearIndexPages || [];
 
 async function api(params, tries = 4) {
   const url = API + '?' + new URLSearchParams({ format: 'json', formatversion: '2', ...params });
@@ -75,41 +74,77 @@ async function discoverOtherLists() {
   } catch { /* report only */ }
 }
 
+/** Every page in "Category:Hot Wheels by Series" - 2,200+ themed and premium lines. */
+async function seriesCategory() {
+  const out = [];
+  let cont = null;
+  do {
+    const j = await api({ action: 'query', list: 'categorymembers', cmtitle: 'Category:Hot Wheels by Series', cmlimit: '500', cmtype: 'page', ...(cont ? { cmcontinue: cont } : {}) });
+    out.push(...(j.query?.categorymembers || []).map((m) => m.title));
+    cont = j.continue?.cmcontinue || null;
+    await sleep(1000);
+  } while (cont && out.length < 6000);
+  return out;
+}
+
+/** The year in a series title: "Forza Horizon Series (2021)" or "2024 Car Culture". */
+const titleYear = (t) => {
+  const m = /\((\d{4})\)\s*$/.exec(t) || /^(\d{4})\b/.exec(t);
+  return m ? Number(m[1]) : 0;
+};
+
 /**
- * Premium and themed lines (Car Culture, Boulevard, Pop Culture, RLC, Team Transport) are not in
- * the yearly mainline lists. Their index pages link to one page per year, and those year pages do
- * carry a Body Color column, so they are read directly as well as harvested for casting pages.
+ * Premium and themed lines (Car Culture, Boulevard, Forza, Fast & Furious, Pop Culture, RLC and
+ * the rest) are absent from the yearly mainline lists. Their pages carry a Body Color column, so
+ * they are read directly; pages with no year in the title are index pages, so only their links
+ * are followed - that keeps a flood of undated rows out of the dataset.
  */
 async function crawlSeriesPages(failed) {
   const rows = []; const castings = new Set();
-  if (!YEAR_INDEX.length) return { rows, castings };
-  const yearPages = new Map();
-  for (const idx of YEAR_INDEX) {
-    try {
-      const j = await api({ action: 'parse', page: idx, prop: 'text', disableeditsection: '1', redirects: '1' });
-      for (const t of castingLinks(j.parse?.text || '')) {
-        const m = /^(\d{4})\s+\S/.exec(t);
-        const y = m && Number(m[1]);
-        if (y && y >= CAST_FROM && y <= TO) yearPages.set(t, y);
-      }
-    } catch (e) { failed.push(`index ${idx}: ${e.message}`); }
+  let titles = [];
+  try { titles = await seriesCategory(); } catch (e) { failed.push(`series category: ${e.message}`); }
+  for (const t of EXTRA) if (!titles.includes(t)) titles.push(t);
+  const dated = titles.filter((t) => { const y = titleYear(t); return y >= CAST_FROM && y <= TO; });
+  const undated = titles.filter((t) => !titleYear(t));
+  console.log(`Series category: ${titles.length} pages - ${dated.length} dated from ${CAST_FROM}, ${undated.length} undated index pages`);
+  const queue = new Map(dated.map((t) => [t, titleYear(t)]));
+  const seenIdx = new Set();
+
+  const readPage = async (page, year, harvestYearLinks) => {
+    const j = await api({ action: 'parse', page, prop: 'text', disableeditsection: '1', redirects: '1' });
+    const html = j.parse?.text || '';
+    if (year) rows.push(...parsePremiumPage(html, year, j.parse?.title || page));
+    for (const l of castingLinks(html)) {
+      const ly = titleYear(l);
+      if (!ly) { castings.add(l); continue; }
+      if (harvestYearLinks && ly >= CAST_FROM && ly <= TO && !queue.has(l)) queue.set(l, ly);
+    }
     await sleep(1000);
+  };
+
+  // index pages first: they add the dated pages the category may not list directly
+  if (undated.length) {
+    const bar = progress('Series index pages', undated.length);
+    for (const page of undated) {
+      if (seenIdx.has(page)) { bar.tick('dup'); continue; }
+      seenIdx.add(page);
+      try { await readPage(page, 0, true); bar.tick(page.slice(0, 26)); }
+      catch (e) { failed.push(`index ${page}: ${e.message}`); bar.tick('FAILED'); }
+    }
+    bar.done();
   }
-  if (!yearPages.size) { console.log('No premium/themed year pages found.'); return { rows, castings }; }
-  const bar = progress('Premium & themed lines', yearPages.size);
-  for (const [page, y] of yearPages) {
-    try {
-      const j = await api({ action: 'parse', page, prop: 'text', disableeditsection: '1', redirects: '1' });
-      const html = j.parse?.text || '';
-      const got = parsePremiumPage(html, y, j.parse?.title || page);
-      rows.push(...got);
-      castingLinks(html).forEach((x) => { if (!/^\d{4}\s/.test(x)) castings.add(x); });
-      bar.tick(`${page.slice(0, 24)}: ${got.length}`);
-    } catch (e) { failed.push(`series ${page}: ${e.message}`); bar.tick('FAILED'); }
-    await sleep(1000);
+
+  const list = [...queue.entries()];
+  if (list.length) {
+    const bar = progress('Themed & premium series', list.length);
+    for (const [page, y] of list) {
+      const before = rows.length;
+      try { await readPage(page, y, false); bar.tick(`${page.slice(0, 22)}: ${rows.length - before}`); }
+      catch (e) { failed.push(`series ${page}: ${e.message}`); bar.tick('FAILED'); }
+    }
+    bar.done();
   }
-  bar.done();
-  console.log(`Premium & themed: ${rows.length} rows from ${yearPages.size} year pages`);
+  console.log(`Themed & premium: ${rows.length} rows from ${list.length} year pages, ${castings.size} casting pages found`);
   return { rows, castings };
 }
 

@@ -9,8 +9,8 @@ the casting pages, but at one request per second it costs real time:
 
 | Range | Casting pages | Run time |
 |---|---|---|
-| 2010 → today (current setting) | ~1,500 | ~30 min |
-| 1968 → today | ~5,000 | ~2 h |
+| 2010 → today (current setting) | ~1,500 casting + ~1,200 series | ~1.5–2 h |
+| 1968 → today | ~5,000 casting + ~2,200 series | ~3–4 h |
 
 **What is set now:** scheduled monthly runs use `--castings-from 2010`, so cars released before
 2010 keep their name, card code, series and number, but have no colour.
@@ -28,10 +28,16 @@ let a run skip pages that have not changed, turning 30 minutes into a few. Not b
 
 ## 3. Collections the yearly lists do not cover
 
-Premium, Car Culture, Team Transport, RLC and the themed sets are missing from the yearly lists.
-They are reached through index pages listed in `data-pipeline/extra-pages.json`, which currently
-holds only the Formula One collections. `npm run data` prints the other list-like pages it finds
-on the wiki — add the useful ones to that file.
+Done, and no longer a hand-kept list: the pipeline reads every page in
+`Category:Hot Wheels by Series` (about 2,240 pages — Car Culture, Boulevard, Team Transport,
+Pop Culture, RLC, Forza, Fast & Furious, Formula One and the rest). Pages with a year in the
+title are parsed for their own rows; pages without one are treated as index pages and only
+their links are followed, so undated rows do not flood the dataset.
+`data-pipeline/extra-pages.json` is now only a safety net for anything that category misses.
+
+Worth checking after a run: the category also holds non-car product lines (1:18 scale,
+"100% Hot Wheels"), which cost requests and add rows that may not belong in a die-cast
+collection. If they turn out to be noise, filter them by title.
 
 ## 4. Casting codes (the code stamped under the car)
 
