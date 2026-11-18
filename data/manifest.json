@@ -1,434 +1,441 @@
 {
- "version": 3,
- "built": "2026-11-15T16:19:38.546Z",
- "total": 29585,
+ "version": 4,
+ "built": "2026-11-18T23:54:51.967Z",
+ "total": 63011,
  "shards": [
   {
    "y": 0,
    "file": "y0.json",
-   "hash": "c7ce227477fcdc49",
-   "size": 647219,
-   "n": 5229
+   "hash": "8f3e4fc1a5179927",
+   "size": 1508693,
+   "n": 11052
+  },
+  {
+   "y": 1967,
+   "file": "y1967.json",
+   "hash": "8ae9abf956e1d1ea",
+   "size": 1233,
+   "n": 9
   },
   {
    "y": 1968,
    "file": "y1968.json",
-   "hash": "6796d562dc9360f3",
-   "size": 1361,
-   "n": 16
+   "hash": "09651415e5ba2d46",
+   "size": 33037,
+   "n": 274
   },
   {
    "y": 1969,
    "file": "y1969.json",
-   "hash": "d42026e3ca5c8f8d",
-   "size": 2181,
-   "n": 24
+   "hash": "57feca7d6106e819",
+   "size": 30107,
+   "n": 242
   },
   {
    "y": 1970,
    "file": "y1970.json",
-   "hash": "e6baf08d19bc066e",
-   "size": 337,
-   "n": 3
+   "hash": "b3655bbcbccb8221",
+   "size": 51707,
+   "n": 378
   },
   {
    "y": 1971,
    "file": "y1971.json",
-   "hash": "046f3c76dc92dd64",
-   "size": 474,
-   "n": 5
+   "hash": "eb6ef7e760e84d18",
+   "size": 39420,
+   "n": 294
   },
   {
    "y": 1972,
    "file": "y1972.json",
-   "hash": "2c77320708c6bd58",
-   "size": 921,
-   "n": 8
+   "hash": "03336e5633f4105a",
+   "size": 14488,
+   "n": 112
   },
   {
    "y": 1973,
    "file": "y1973.json",
-   "hash": "fb1fa516efc07af7",
-   "size": 2229,
-   "n": 19
+   "hash": "4a6e14614bace8b1",
+   "size": 31313,
+   "n": 248
   },
   {
    "y": 1974,
    "file": "y1974.json",
-   "hash": "fe99c6c24c6c9ab7",
-   "size": 4058,
-   "n": 34
+   "hash": "468e29c753f1dc5e",
+   "size": 13095,
+   "n": 97
   },
   {
    "y": 1975,
    "file": "y1975.json",
-   "hash": "a82ba62b9000ebd5",
-   "size": 3362,
-   "n": 31
+   "hash": "480aacadffcd2f85",
+   "size": 10622,
+   "n": 74
   },
   {
    "y": 1976,
    "file": "y1976.json",
-   "hash": "d882aff1d2b61b69",
-   "size": 5734,
-   "n": 48
+   "hash": "4bc074942185d45d",
+   "size": 15495,
+   "n": 107
   },
   {
    "y": 1977,
    "file": "y1977.json",
-   "hash": "696b021e19cc766a",
-   "size": 9605,
-   "n": 89
+   "hash": "c47213e4a9625fa3",
+   "size": 29588,
+   "n": 213
   },
   {
    "y": 1978,
    "file": "y1978.json",
-   "hash": "22fd0c6a129ced06",
-   "size": 7563,
-   "n": 56
+   "hash": "293fce87f2980ee2",
+   "size": 19985,
+   "n": 132
   },
   {
    "y": 1979,
    "file": "y1979.json",
-   "hash": "12868ca94faa547a",
-   "size": 8419,
-   "n": 57
+   "hash": "2ae15c3f2e9fa469",
+   "size": 22758,
+   "n": 142
   },
   {
    "y": 1980,
    "file": "y1980.json",
-   "hash": "ac237925c514c779",
-   "size": 7660,
-   "n": 55
+   "hash": "5b5912f380faa5cd",
+   "size": 15085,
+   "n": 101
   },
   {
    "y": 1981,
    "file": "y1981.json",
-   "hash": "24538dbdc7349c5d",
-   "size": 4479,
-   "n": 33
+   "hash": "aea4411c1ff39f4a",
+   "size": 13837,
+   "n": 94
   },
   {
    "y": 1982,
    "file": "y1982.json",
-   "hash": "3c5e62ff3cf21fa8",
-   "size": 12651,
-   "n": 99
+   "hash": "273618358d728de7",
+   "size": 35798,
+   "n": 247
   },
   {
    "y": 1983,
    "file": "y1983.json",
-   "hash": "8f7146ad86d35151",
-   "size": 11925,
-   "n": 91
+   "hash": "a360b227b8dbd190",
+   "size": 52122,
+   "n": 361
   },
   {
    "y": 1984,
    "file": "y1984.json",
-   "hash": "ce215a2d8855c0c9",
-   "size": 5535,
-   "n": 40
+   "hash": "4ec95a6db407206b",
+   "size": 22295,
+   "n": 150
   },
   {
    "y": 1985,
    "file": "y1985.json",
-   "hash": "3d1f8dc8143946f3",
-   "size": 10546,
-   "n": 76
+   "hash": "e74b7ba48369c820",
+   "size": 33812,
+   "n": 218
   },
   {
    "y": 1986,
    "file": "y1986.json",
-   "hash": "8dd8996ca33c5584",
-   "size": 9406,
-   "n": 73
+   "hash": "6cbf8a4c67038aad",
+   "size": 24441,
+   "n": 166
   },
   {
    "y": 1987,
    "file": "y1987.json",
-   "hash": "37e6cbff0ff38bdc",
-   "size": 9585,
-   "n": 80
+   "hash": "10938a8680ac7a54",
+   "size": 32409,
+   "n": 226
   },
   {
    "y": 1988,
    "file": "y1988.json",
-   "hash": "1b3508f09af7e1c0",
-   "size": 12906,
-   "n": 90
+   "hash": "8ba23ab4348d4582",
+   "size": 36309,
+   "n": 235
   },
   {
    "y": 1989,
    "file": "y1989.json",
-   "hash": "8edf05166d15247d",
-   "size": 15123,
-   "n": 148
+   "hash": "20e0e713cfb3f595",
+   "size": 47094,
+   "n": 354
   },
   {
    "y": 1990,
    "file": "y1990.json",
-   "hash": "ba081b7e82caea64",
-   "size": 15851,
-   "n": 111
+   "hash": "f4c46fc106e90e19",
+   "size": 73185,
+   "n": 455
   },
   {
    "y": 1991,
    "file": "y1991.json",
-   "hash": "fd8cb5cd41cbc016",
-   "size": 10431,
-   "n": 79
+   "hash": "db3e6470c79816bd",
+   "size": 41601,
+   "n": 267
   },
   {
    "y": 1992,
    "file": "y1992.json",
-   "hash": "08481d3e4b9604dd",
-   "size": 5619,
-   "n": 41
+   "hash": "4b29d0b7a47b6c9b",
+   "size": 30080,
+   "n": 194
   },
   {
    "y": 1993,
    "file": "y1993.json",
-   "hash": "97cce3aa4123fe53",
-   "size": 13427,
-   "n": 100
+   "hash": "ff014862e73b5291",
+   "size": 83906,
+   "n": 550
   },
   {
    "y": 1994,
    "file": "y1994.json",
-   "hash": "a32533554a13736a",
-   "size": 8574,
-   "n": 57
+   "hash": "4d0b40725a8783e8",
+   "size": 74178,
+   "n": 458
   },
   {
    "y": 1995,
    "file": "y1995.json",
-   "hash": "1ab2b8184c506fb7",
-   "size": 20426,
-   "n": 149
+   "hash": "04e4072363017f88",
+   "size": 92775,
+   "n": 552
   },
   {
    "y": 1996,
    "file": "y1996.json",
-   "hash": "6969b970652babab",
-   "size": 27011,
-   "n": 212
+   "hash": "c3a4964671eceb45",
+   "size": 112677,
+   "n": 692
   },
   {
    "y": 1997,
    "file": "y1997.json",
-   "hash": "430859ef7e58a481",
-   "size": 17027,
-   "n": 102
+   "hash": "db14373fcbfe205c",
+   "size": 103195,
+   "n": 606
   },
   {
    "y": 1998,
    "file": "y1998.json",
-   "hash": "54c0452d5877d15b",
-   "size": 26056,
-   "n": 149
+   "hash": "1e0fac8768b281cf",
+   "size": 125619,
+   "n": 702
   },
   {
    "y": 1999,
    "file": "y1999.json",
-   "hash": "3d898469e8b13f31",
-   "size": 47037,
-   "n": 347
+   "hash": "0f1a1d41ca30d422",
+   "size": 134483,
+   "n": 779
   },
   {
    "y": 2000,
    "file": "y2000.json",
-   "hash": "5ecf09015932b001",
-   "size": 56123,
-   "n": 390
+   "hash": "191cba899cbcb739",
+   "size": 146556,
+   "n": 835
   },
   {
    "y": 2001,
    "file": "y2001.json",
-   "hash": "0e63de62df3ce5b1",
-   "size": 59015,
-   "n": 407
+   "hash": "9a86f13eca70ed65",
+   "size": 155248,
+   "n": 890
   },
   {
    "y": 2002,
    "file": "y2002.json",
-   "hash": "22158a9779bed63f",
-   "size": 61693,
-   "n": 414
+   "hash": "ec3af8b808909f49",
+   "size": 158715,
+   "n": 897
   },
   {
    "y": 2003,
    "file": "y2003.json",
-   "hash": "c090809b096e246e",
-   "size": 74914,
-   "n": 464
+   "hash": "0553b4d7d725f9e6",
+   "size": 195134,
+   "n": 1064
   },
   {
    "y": 2004,
    "file": "y2004.json",
-   "hash": "806240a848a25c3f",
-   "size": 79657,
-   "n": 529
+   "hash": "d10dcc726cf58235",
+   "size": 192128,
+   "n": 1098
   },
   {
    "y": 2005,
    "file": "y2005.json",
-   "hash": "74c77a64057d0ef5",
-   "size": 83218,
-   "n": 546
+   "hash": "8721f5439e00f6fa",
+   "size": 221688,
+   "n": 1277
   },
   {
    "y": 2006,
    "file": "y2006.json",
-   "hash": "112b103c38f5a048",
-   "size": 96139,
-   "n": 668
+   "hash": "edd91cf7bb089678",
+   "size": 243579,
+   "n": 1410
   },
   {
    "y": 2007,
    "file": "y2007.json",
-   "hash": "e9ae2033d529478b",
-   "size": 100741,
-   "n": 662
+   "hash": "1cbf1f27b5f27c3e",
+   "size": 261828,
+   "n": 1480
   },
   {
    "y": 2008,
    "file": "y2008.json",
-   "hash": "1ebeda0ad56855d9",
-   "size": 125275,
-   "n": 789
+   "hash": "6412a6ff8b6be131",
+   "size": 286867,
+   "n": 1603
   },
   {
    "y": 2009,
    "file": "y2009.json",
-   "hash": "8a203d0917273708",
-   "size": 141523,
-   "n": 837
+   "hash": "5272f06659dd887f",
+   "size": 336994,
+   "n": 1781
   },
   {
    "y": 2010,
    "file": "y2010.json",
-   "hash": "d8fb5c143f3f5419",
-   "size": 151238,
-   "n": 888
+   "hash": "6a5908b9aad33c10",
+   "size": 371182,
+   "n": 2015
   },
   {
    "y": 2011,
    "file": "y2011.json",
-   "hash": "eafb07c118435dd7",
-   "size": 171015,
-   "n": 925
+   "hash": "8d644b81f0e30b7d",
+   "size": 336285,
+   "n": 1914
   },
   {
    "y": 2012,
    "file": "y2012.json",
-   "hash": "027f21b3bbd05778",
-   "size": 169404,
-   "n": 896
+   "hash": "59a80b284481fae6",
+   "size": 313602,
+   "n": 1678
   },
   {
    "y": 2013,
    "file": "y2013.json",
-   "hash": "3d80b934c87a1ffe",
-   "size": 172923,
-   "n": 920
+   "hash": "23b7e686e3aa8c8a",
+   "size": 291121,
+   "n": 1519
   },
   {
    "y": 2014,
    "file": "y2014.json",
-   "hash": "f50d947d486209eb",
-   "size": 180034,
-   "n": 938
+   "hash": "a67b5dcea4e30437",
+   "size": 320420,
+   "n": 1683
   },
   {
    "y": 2015,
    "file": "y2015.json",
-   "hash": "22f460246dd809e1",
-   "size": 165280,
-   "n": 829
+   "hash": "842549c87dcf7c66",
+   "size": 275680,
+   "n": 1393
   },
   {
    "y": 2016,
    "file": "y2016.json",
-   "hash": "b3969961b0791f80",
-   "size": 173400,
-   "n": 862
+   "hash": "5bc7b380919a7390",
+   "size": 295908,
+   "n": 1521
   },
   {
    "y": 2017,
    "file": "y2017.json",
-   "hash": "d71ebb8aaa452b08",
-   "size": 160016,
-   "n": 843
+   "hash": "19f8e5322938ae98",
+   "size": 288754,
+   "n": 1520
   },
   {
    "y": 2018,
    "file": "y2018.json",
-   "hash": "35554d5284778c9c",
-   "size": 189136,
-   "n": 959
+   "hash": "38e57d2a74457a1a",
+   "size": 329222,
+   "n": 1717
   },
   {
    "y": 2019,
    "file": "y2019.json",
-   "hash": "e9f8c221e4c67c09",
-   "size": 190376,
-   "n": 940
+   "hash": "ab6f8b9871205d5b",
+   "size": 342957,
+   "n": 1743
   },
   {
    "y": 2020,
    "file": "y2020.json",
-   "hash": "dc037de8c471cf2a",
-   "size": 190132,
-   "n": 920
+   "hash": "1f567b9ed4c276f0",
+   "size": 350478,
+   "n": 1762
   },
   {
    "y": 2021,
    "file": "y2021.json",
-   "hash": "ab3c49aaa1e9c5ab",
-   "size": 200779,
-   "n": 998
+   "hash": "a1f13e9f814554a0",
+   "size": 359492,
+   "n": 1814
   },
   {
    "y": 2022,
    "file": "y2022.json",
-   "hash": "5e5c18a63ee76ffe",
-   "size": 205371,
-   "n": 964
+   "hash": "357d7e13cd0a7d07",
+   "size": 381469,
+   "n": 1851
   },
   {
    "y": 2023,
    "file": "y2023.json",
-   "hash": "cf0541580596e41f",
-   "size": 220087,
-   "n": 987
+   "hash": "763cf0439e270dd5",
+   "size": 401249,
+   "n": 1888
   },
   {
    "y": 2024,
    "file": "y2024.json",
-   "hash": "78b22f4d6b5a6865",
-   "size": 230290,
-   "n": 967
+   "hash": "d7a4cb6d36d97c7a",
+   "size": 407521,
+   "n": 1823
   },
   {
    "y": 2025,
    "file": "y2025.json",
-   "hash": "f988027904cf15f1",
-   "size": 238027,
-   "n": 1011
+   "hash": "92a565933e7115bb",
+   "size": 403643,
+   "n": 1839
   },
   {
    "y": 2026,
    "file": "y2026.json",
-   "hash": "dd5366f0072625f6",
-   "size": 224931,
-   "n": 970
+   "hash": "e9007882dc67a418",
+   "size": 379878,
+   "n": 1708
   },
   {
    "y": 2027,
    "file": "y2027.json",
-   "hash": "0e89f80482db6522",
-   "size": 55913,
-   "n": 311
+   "hash": "929c3dbcbc7685cd",
+   "size": 92551,
+   "n": 507
   }
  ],
  "source": {
